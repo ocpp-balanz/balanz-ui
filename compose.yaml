@@ -1,0 +1,9 @@
+services:
+  balanz:
+    image: balanz-ui
+    restart: always
+    ports:
+      - 443:8888
+    environment:
+      - VITE_BALANZ_URL=ws://someserver:9999/api
+    command: ["npm", "run", "dev"]
