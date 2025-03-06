@@ -49,9 +49,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       // Next, let's review the entries in more details to determine wh...
       let usage = null;
       let total_wh = 0.0;
-      for (let ci = 0; ci < sessionData[i].charging_history.length - 1; ci++) {
+      for (let ci = 0; ci < sessionData[i].charging_history.length; ci++) {
         // Work out how long this interval is.
-        const seconds = sessionData[i].charging_history[ci + 1].timestamp - sessionData[i].charging_history[ci].timestamp;
+        let seconds = 0;
+        if (ci == sessionData[i].charging_history.length - 1)
+          seconds = sessionData[i].end_time - sessionData[i].charging_history[ci].timestamp;
+        else
+          seconds = sessionData[i].charging_history[ci + 1].timestamp - sessionData[i].charging_history[ci].timestamp;
         if (sessionData[i].charging_history[ci].usage != null)
           usage = sessionData[i].charging_history[ci].usage;
         else if (usage == null && sessionData[i].charging_history[ci].offered != null) {
@@ -103,14 +107,14 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       start_date = tomorrow(start_date);
 
       let next_date = null;    
-      for (let date = start_date; date < midnight; date = next_date) {
+      for (let date = start_date; date <= midnight; date = next_date) {
         next_date = tomorrow(date);
         result.push({x: date.getDate().toString(), energy: 0, timestamp: date});
       }
     } else if (period == "7days") {
       start_date = new Date(midnight.getTime() - 24 * 7 * 60 * 60 * 1000);
       let next_date = null;    
-      for (let date = start_date; date < midnight; date = next_date) {
+      for (let date = start_date; date <= midnight; date = next_date) {
         next_date = tomorrow(date);
         result.push({x: date.getDate().toString(), energy: 0, timestamp: date});
       } 
