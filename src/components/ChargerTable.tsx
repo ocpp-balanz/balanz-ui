@@ -99,7 +99,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
     return (
     <Stack>
       <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
-        <Button color="inherit" onClick={() => {persist_chargers()}} variant='contained'>Persist Chargers</Button>  
+        <Button onClick={() => {persist_chargers()}} variant='contained'>Persist Chargers</Button>  
       </Box>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <DataGrid

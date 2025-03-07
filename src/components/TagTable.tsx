@@ -142,7 +142,7 @@ const TagTable: React.FC<TagTableProps> = ({api}) => {
   return (
     <Stack>
       <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
-        <Button color="inherit" onClick={() => {persist_tags()}} variant='contained'>Persist Tags</Button>  
+        <Button onClick={() => {persist_tags()}} variant='contained'>Persist Tags</Button>  
       </Box>
       <DataGrid
         editMode="row"

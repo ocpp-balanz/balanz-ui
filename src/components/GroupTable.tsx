@@ -91,7 +91,7 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
   return (
     <Stack>
       <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
-        <Button color="inherit" onClick={() => {persist_groups()}} variant='contained'>Persist Groups</Button>  
+        <Button onClick={() => {persist_groups()}} variant='contained'>Persist Groups</Button>  
       </Box>
       <DataGrid
         getRowId={getRowId}
