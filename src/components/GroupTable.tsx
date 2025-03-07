@@ -87,6 +87,7 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
       <DataGrid
         getRowId={getRowId}
         rows={groupData}
+        density="compact"
         slots={{ toolbar: GridToolbar }}
         // @ts-expect-error Much easier this way
         columns={columns}

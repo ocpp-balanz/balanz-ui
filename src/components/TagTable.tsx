@@ -139,6 +139,7 @@ const TagTable: React.FC<TagTableProps> = ({api}) => {
         editMode="row"
         getRowId={getRowId}
         rows={tagData}
+        density="compact"
         slots={{ toolbar: GridToolbar }}
         // @ts-expect-error Much easier this way
         columns={columns}

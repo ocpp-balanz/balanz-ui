@@ -96,6 +96,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
         <DataGrid
           getRowId={getRowId}
           rows={chargerData}
+          density="compact"
           slots={{ toolbar: GridToolbar }}
           // @ts-expect-error Much easier this way
           columns={columns}
