@@ -1,5 +1,5 @@
 import { CHARGING_ENTRY, SESSION } from '../types/types';
-import { DataGrid, GridColDef, GridRowModel, GridRowId, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowModel, GridRowId, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import ChargingHistory from './ChargingHistory';
 import { format_time } from '../common/utils';
 import { Button, Stack, Box } from '@mui/material';
@@ -70,10 +70,20 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
     },
   ];
 
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport/>
+      </GridToolbarContainer>
+    );
+  }
+
   return (
     <Stack>
       <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
-        <Button onClick={download_sessions} color="inherit" variant='contained'>Download as CSV</Button>
+        <Button onClick={download_sessions} variant='contained'>Download Sessions as raw CSV</Button>  
+
       </Box>
       <DataGrid 
         getRowId={getRowId}
@@ -81,7 +91,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
         columns={columns}
         density="compact"
         sx={{fontSize: '.8rem', width: '100%'}}
-        slots={{ toolbar: GridToolbar }}
+        slots={{ toolbar: CustomToolbar }}
         initialState={{
           sorting: {
             sortModel: [{ field: 'start_time', sort: 'desc' }],

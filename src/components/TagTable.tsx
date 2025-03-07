@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { TAG } from '../types/types';
 import BalanzAPI from '../services/balanz_api';
-import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -130,6 +130,15 @@ const TagTable: React.FC<TagTableProps> = ({api}) => {
     return tag.id_tag;
   };
 
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport/>
+      </GridToolbarContainer>
+    );
+  }
+
   return (
     <Stack>
       <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
@@ -140,7 +149,7 @@ const TagTable: React.FC<TagTableProps> = ({api}) => {
         getRowId={getRowId}
         rows={tagData}
         density="compact"
-        slots={{ toolbar: GridToolbar }}
+        slots={{ toolbar: CustomToolbar }}
         // @ts-expect-error Much easier this way
         columns={columns}
         sx={{fontSize: '.8rem'}}

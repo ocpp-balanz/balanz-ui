@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import BalanzAPI from '../services/balanz_api';
 import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
-import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, GridToolbarExport} from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
 
 interface GroupTableProps {
@@ -78,6 +78,15 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
   function getRowId(group: GridRowModel): GridRowId {
     return group.group_id;
   };
+
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport/>
+      </GridToolbarContainer>
+    );
+  }
   
   return (
     <Stack>
@@ -88,7 +97,7 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
         getRowId={getRowId}
         rows={groupData}
         density="compact"
-        slots={{ toolbar: GridToolbar }}
+        slots={{ toolbar: CustomToolbar }}
         // @ts-expect-error Much easier this way
         columns={columns}
         sx={{fontSize: '.8rem'}}

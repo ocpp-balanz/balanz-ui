@@ -2,7 +2,7 @@ import * as React from 'react';
 import { CHARGER } from '../types/types';
 import { useEffect, useState } from 'react';
 import BalanzAPI from '../services/balanz_api';
-import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -86,7 +86,16 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
   function getRowId(charger: GridRowModel): GridRowId {
     return charger.charger_id;
   };
-  
+
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <Box sx={{ flexGrow: 1 }} />
+        <GridToolbarExport/>
+      </GridToolbarContainer>
+    );
+  }
+    
     return (
     <Stack>
       <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
@@ -97,7 +106,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
           getRowId={getRowId}
           rows={chargerData}
           density="compact"
-          slots={{ toolbar: GridToolbar }}
+          slots={{ toolbar: CustomToolbar }}
           // @ts-expect-error Much easier this way
           columns={columns}
           sx={{fontSize: '.8rem'}}
