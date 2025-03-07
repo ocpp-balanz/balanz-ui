@@ -1,5 +1,5 @@
 import { CHARGING_ENTRY, SESSION } from '../types/types';
-import { DataGrid, GridColDef, GridRowModel, GridRowId } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowModel, GridRowId, GridToolbar } from '@mui/x-data-grid';
 import ChargingHistory from './ChargingHistory';
 import { format_time } from '../common/utils';
 import { Button, Stack, Box } from '@mui/material';
@@ -81,6 +81,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
         columns={columns}
         density="compact"
         sx={{fontSize: '.8rem', width: '100%'}}
+        slots={{ toolbar: GridToolbar }}
         initialState={{
           sorting: {
             sortModel: [{ field: 'start_time', sort: 'desc' }],

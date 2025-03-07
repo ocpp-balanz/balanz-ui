@@ -2,7 +2,7 @@ import * as React from 'react';
 import { CHARGER } from '../types/types';
 import { useEffect, useState } from 'react';
 import BalanzAPI from '../services/balanz_api';
-import { DataGrid, GridColDef, GridRowId, GridRowModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbar } from '@mui/x-data-grid';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -96,6 +96,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
         <DataGrid
           getRowId={getRowId}
           rows={chargerData}
+          slots={{ toolbar: GridToolbar }}
           // @ts-expect-error Much easier this way
           columns={columns}
           sx={{fontSize: '.8rem'}}

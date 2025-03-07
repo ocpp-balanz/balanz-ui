@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { TAG } from '../types/types';
 import BalanzAPI from '../services/balanz_api';
-import { DataGrid, GridColDef, GridRowId, GridRowModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbar } from '@mui/x-data-grid';
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -139,6 +139,7 @@ const TagTable: React.FC<TagTableProps> = ({api}) => {
         editMode="row"
         getRowId={getRowId}
         rows={tagData}
+        slots={{ toolbar: GridToolbar }}
         // @ts-expect-error Much easier this way
         columns={columns}
         sx={{fontSize: '.8rem'}}
