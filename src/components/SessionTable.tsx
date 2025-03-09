@@ -82,8 +82,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
   return (
     <Stack>
       <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
-        <Button onClick={download_sessions} variant='contained'>Download Sessions as raw CSV</Button>  
-
+        <Button onClick={download_sessions} variant='contained'>Download backend sessions CSV</Button>  
       </Box>
       <DataGrid 
         getRowId={getRowId}
