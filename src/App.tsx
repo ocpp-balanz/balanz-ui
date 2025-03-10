@@ -63,7 +63,6 @@ function App() {
     );
 
   if (userType == "Status" || userType == "SessionPriority") {
-    console.log("restricted user type");
     return (
     <Container maxWidth={false} disableGutters>
       <Routes>
@@ -71,7 +70,6 @@ function App() {
           path="/Status"
           element={
             <>
-              <ResponsiveAppBar userType={userType}/>
               <Status api={api} /> 
             </>
           }
@@ -84,8 +82,6 @@ function App() {
     </Container>
     );
   }
-
-  console.log("full user type", userType);
 
   return  (
     <Container maxWidth={false} disableGutters>
