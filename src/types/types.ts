@@ -61,3 +61,9 @@ export type SESSION = {
   kwh: string;
   charging_history: Array<CHARGING_ENTRY>;
 };
+
+export type USER = {
+  user_id: string;
+  user_type: string;
+  description: string;
+};

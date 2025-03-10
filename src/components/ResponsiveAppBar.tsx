@@ -18,7 +18,7 @@ const ResponsiveAppBar: React.FC<ResponsiveAppBarProps> = ({ userType }) => {
     if (userType == "Status" || userType == "SessionPriority")
       setPages(['Status']);
     else
-      setPages(['Dashboard', 'Chargers', 'Groups', 'Tags', 'Status', 'Sessions']);
+      setPages(['Dashboard', 'Chargers', 'Groups', 'Tags', 'Status', 'Sessions', 'Users']);
 }, [userType]);
 
   return (

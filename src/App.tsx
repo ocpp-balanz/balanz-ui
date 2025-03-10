@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Status from './pages/Status';
 import Login from './pages/Login';
 import Sessions from './pages/Sessions';
+import Users from './pages/Users';
 
 import './App.css'
 
@@ -140,6 +141,15 @@ function App() {
               <>
                 <ResponsiveAppBar  userType={userType}/>
                 <Sessions api={api} /> 
+              </>
+            }
+          />
+          <Route 
+            path="/Users"
+            element={
+              <>
+                <ResponsiveAppBar  userType={userType}/>
+                <Users api={api} /> 
               </>
             }
           />
