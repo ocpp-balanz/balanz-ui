@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from "react-router";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -6,9 +7,20 @@ import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 
-const pages = ['Dashboard', 'Chargers', 'Groups', 'Tags', 'Status', 'Sessions'];
+interface ResponsiveAppBarProps {
+  userType: string;
+};
 
-function ResponsiveAppBar() {
+const ResponsiveAppBar: React.FC<ResponsiveAppBarProps> = ({ userType }) => {
+  const [pages, setPages] = useState<Array<string>>([]);
+
+  useEffect(() => {
+    if (userType == "Status" || userType == "SessionPriority")
+      setPages(['Status']);
+    else
+      setPages(['Dashboard', 'Chargers', 'Groups', 'Tags', 'Status', 'Sessions']);
+}, [userType]);
+
   return (
     <React.Fragment>
     <AppBar position="fixed"  color="success">

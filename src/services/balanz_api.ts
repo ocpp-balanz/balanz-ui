@@ -7,12 +7,14 @@ export default class BalanzAPI {
     ws: WebSocket;
     outstanding_calls: Map<string, CallFunction>;
     logged_in: boolean;
+    logged_in_user_type: string;
     dummy: boolean;
 
     constructor(url: string) {
         this.ws = new WebSocket(url, ["ocpp1.6"]);
         this.outstanding_calls = new Map<string, CallFunction>();
         this.logged_in = false;
+        this.logged_in_user_type = "";
         if (url == "") {
             console.log('dummy BalanzAPI constructor');
             this.dummy = true;
@@ -94,15 +96,16 @@ export default class BalanzAPI {
         }
     }
 
-    async login(token: string): Promise<boolean> {
+    async login(token: string): Promise<string> {
         const [ok, payload] = await this.call("Login", {"token": token});
         if (ok == 3) {
-            console.log("Succesfully logged in");
             this.logged_in = true;
-            return true;
+            this.logged_in_user_type = payload["user_type"];
+            console.log("Succesfully logged in as " + this.logged_in_user_type);
+            return this.logged_in_user_type;
         } else {
             console.log("Login failed", payload);
-            return false;
+            return "";
         }
     }
 }

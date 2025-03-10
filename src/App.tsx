@@ -19,6 +19,7 @@ function App() {
   const [api, setApi] = useState<BalanzAPI>(new BalanzAPI(""));
   const [token, setToken] = useState<string>("");
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const [userType, setUserType] = useState<string>("");
 
   const { pathname } = useLocation();
 
@@ -40,35 +41,68 @@ function App() {
   useMemo(() => {
     const doLogin = async() => {
       if (token != "" && !api.dummy) {
-        const ok = await api.login(token);
-        setLoggedIn(ok);
+        const user_type = await api.login(token);
+        if (user_type != "") {
+          setUserType(user_type);
+          setLoggedIn(true);
+          console.log("Logged in as", user_type);
+        }  
       }
     }
     doLogin();
   }, 
   [token, api]);
 
-  return loading ? (
-    <Loader />
-  ) : ( !loggedIn ? (
-    <Login setToken={setToken} showLoginFailure={token != "" && !loggedIn}/> 
-  ) : (
+  if (loading)
+      return (<Loader />);
+
+  if (!loggedIn)
+    return (
+      <Login setToken={setToken} showLoginFailure={token != "" && !loggedIn}/> 
+    );
+
+  if (userType == "Status" || userType == "SessionPriority") {
+    console.log("restricted user type");
+    return (
+    <Container maxWidth={false} disableGutters>
+      <Routes>
+        <Route 
+          path="/Status"
+          element={
+            <>
+              <ResponsiveAppBar userType={userType}/>
+              <Status api={api} /> 
+            </>
+          }
+        />
+        <Route
+          path="*"
+          element={<Navigate to="/Status" replace />}
+        />
+      </Routes>
+    </Container>
+    );
+  }
+
+  console.log("full user type", userType);
+
+  return  (
     <Container maxWidth={false} disableGutters>
         <Routes>
-          <Route
-            path="/Dashboard"
-            element={
-              <>
-                <ResponsiveAppBar />
-                <Dashboard api={api} />
-              </>
-            }
-          />
+            <Route
+              path="/Dashboard"
+              element={
+                <>
+                  <ResponsiveAppBar userType={userType}/>
+                  <Dashboard api={api} />
+                </>
+              }
+            />
           <Route
             path="/Chargers"
             element={
               <>
-                <ResponsiveAppBar />
+                <ResponsiveAppBar  userType={userType}/>
                 <Chargers api={api} />
               </>
             }
@@ -77,7 +111,7 @@ function App() {
             path="/Groups"
             element={
               <>
-                <ResponsiveAppBar />
+                <ResponsiveAppBar  userType={userType}/>
                 <Groups api={api} />
               </>
             }
@@ -86,7 +120,7 @@ function App() {
             path="/Tags"
             element={
               <>
-                <ResponsiveAppBar />
+                <ResponsiveAppBar  userType={userType}/>
                 <Tags api={api} />
               </>
             }
@@ -95,7 +129,7 @@ function App() {
             path="/Status"
             element={
               <>
-                <ResponsiveAppBar />
+                <ResponsiveAppBar  userType={userType}/>
                 <Status api={api} /> 
               </>
             }
@@ -104,7 +138,7 @@ function App() {
             path="/Sessions"
             element={
               <>
-                <ResponsiveAppBar />
+                <ResponsiveAppBar  userType={userType}/>
                 <Sessions api={api} /> 
               </>
             }
@@ -115,7 +149,7 @@ function App() {
           />
         </Routes>
     </Container>
-  ));
+  );
 }
 
-export default App
+export default App;

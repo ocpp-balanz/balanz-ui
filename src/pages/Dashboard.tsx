@@ -22,7 +22,7 @@ const Dashboard: React.FC<DashboardProp> = ({ api }) => {
   
   const getSessions = (api: BalanzAPI) => {
     const getSessions = async() => {
-      const [ok, payload] = await api.call("GetSessions", {});
+      const [ok, payload] = await api.call("GetSessions", {"include_live": "true"});
       if (ok == 3) {
         console.log("Succesfully retrieved sessions, #", payload.length);
         setSessionData(payload);
