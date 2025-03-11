@@ -97,15 +97,6 @@ const TagTable: React.FC<TagTableProps> = ({api}) => {
     }
   }
 
-  async function persist_tags() {
-    const [ok,] = await api.call("WriteTags", {});
-    if (ok == 3) {
-      snack("Succesfully persisted tags");
-    } else {
-      snack("Error persisting tags");
-    }
-  }
-  
   const columns: GridColDef<(typeof tagData)[number]>[] = [
     { field: 'id_tag', headerName: 'ID', flex: 2, editable: true },
     { field: 'user_name', headerName: 'User Name', flex: 3, editable: true},
@@ -141,9 +132,6 @@ const TagTable: React.FC<TagTableProps> = ({api}) => {
 
   return (
     <Stack>
-      <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
-        <Button onClick={() => {persist_tags()}} variant='contained'>Persist Tags</Button>  
-      </Box>
       <DataGrid
         editMode="row"
         getRowId={getRowId}

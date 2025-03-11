@@ -18,12 +18,12 @@ const ResponsiveAppBar: React.FC<ResponsiveAppBarProps> = ({ userType }) => {
     if (userType == "Status" || userType == "SessionPriority")
       setPages(['Status']);
     else
-      setPages(['Dashboard', 'Chargers', 'Groups', 'Tags', 'Status', 'Sessions', 'Users']);
+      setPages(['Status', 'Sessions', 'Statistics', 'Chargers', 'Groups', 'Tags', 'Users']);
 }, [userType]);
 
   return (
     <React.Fragment>
-    <AppBar position="fixed"  color="success">
+    <AppBar position="fixed" color="success">
       <Container maxWidth={false}>
         <Toolbar>
           <Box sx={{ flexGrow: 1}}>

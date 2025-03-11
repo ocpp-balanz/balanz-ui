@@ -5,7 +5,6 @@ import BalanzAPI from '../services/balanz_api';
 import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 
 interface ChargerTableProps {
@@ -45,15 +44,6 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
       }
     }, [api]
   );
-
-  async function persist_chargers() {
-    const [ok,] = await api.call("WriteChargers", {});
-    if (ok == 3) {
-      snack("Succesfully persisted chargers");
-    } else {
-      snack("Error persisting charges");
-    }
-  }
 
   // Get chargers
   useEffect(() => {
@@ -98,9 +88,6 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
     
     return (
     <Stack>
-      <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
-        <Button onClick={() => {persist_chargers()}} variant='contained'>Persist Chargers</Button>  
-      </Box>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <DataGrid
           getRowId={getRowId}

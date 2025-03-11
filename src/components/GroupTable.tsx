@@ -6,7 +6,6 @@ import BalanzAPI from '../services/balanz_api';
 import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
 import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, GridToolbarExport} from '@mui/x-data-grid';
-import Button from '@mui/material/Button';
 
 interface GroupTableProps {
   api: BalanzAPI;
@@ -60,15 +59,6 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
     }, [api]
   );
 
-  async function persist_groups() {
-    const [ok,] = await api.call("WriteGroups", {});
-    if (ok == 3) {
-      snack("Succesfully persisted groups");
-    } else {
-      snack("Error persisting groups");
-    }
-  }
-
   const columns: GridColDef<(typeof groupData)[number]>[] = [
     { field: 'group_id', headerName: 'ID', flex: 1 },
     { field: 'description', headerName: 'Description', flex: 3, editable: true},
@@ -90,9 +80,6 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
   
   return (
     <Stack>
-      <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
-        <Button onClick={() => {persist_groups()}} variant='contained'>Persist Groups</Button>  
-      </Box>
       <DataGrid
         getRowId={getRowId}
         rows={groupData}

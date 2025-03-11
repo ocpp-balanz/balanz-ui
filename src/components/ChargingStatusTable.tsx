@@ -88,7 +88,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
   }
 
   const theme = useTheme();
-  const fullWidth = useMediaQuery(theme.breakpoints.up("md"));
+  const fullWidth = useMediaQuery(theme.breakpoints.up("lg"));
 
     // Do a little manipulation of chargerData to connectionData. Could have been easier perhaps
   // if API had returned directly, but no big deal ...  
@@ -195,11 +195,13 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
             <EvStation color="info" sx={{ scale: '1'}}/> {chargerData.length}
           </Stack> 
           */}
-          <Stack>
-            <Stack direction="row" alignItems="center" gap={1} useFlexGap>
-              <ElectricalServicesIcon color='info' sx={{ scale: '1' }}/> {connectorData.length} 
+          <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+            <Stack>
+              <Stack direction="row" alignItems="center" gap={1} useFlexGap>
+                <ElectricalServicesIcon color='info' sx={{ scale: '1' }}/> {connectorData.length} 
+              </Stack>
+              Total
             </Stack>
-            Total
           </Stack>
           <Stack>
             <Stack direction="row" alignItems="center" gap={1}>

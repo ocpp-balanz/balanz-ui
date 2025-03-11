@@ -7,7 +7,7 @@ import Loader from './common/Loader';
 import Chargers from './pages/Chargers';
 import Groups from './pages/Groups';
 import Tags from './pages/Tags';
-import Dashboard from './pages/Dashboard';
+import Statistics from './pages/Statistics';
 import Status from './pages/Status';
 import Login from './pages/Login';
 import Sessions from './pages/Sessions';
@@ -87,11 +87,11 @@ function App() {
     <Container maxWidth={false} disableGutters>
         <Routes>
             <Route
-              path="/Dashboard"
+              path="/Statistics"
               element={
                 <>
                   <ResponsiveAppBar userType={userType}/>
-                  <Dashboard api={api} />
+                  <Statistics api={api} />
                 </>
               }
             />
