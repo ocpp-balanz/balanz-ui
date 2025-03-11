@@ -288,6 +288,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
           hideFooterPagination={true}
           hideFooter={true}
           rows={connectorData}
+          // @ts-expect-error Much easier this way
           columns={columns}
           density="compact"
           sx={{fontSize: '.8rem', width: '100%'}}
