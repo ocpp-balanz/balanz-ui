@@ -1,6 +1,6 @@
 import { CHARGER, CHARGING_ENTRY, CONNECTOR, GROUP } from '../types/types';
-import { useState, useMemo } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { useState, useMemo, useCallback } from 'react';
+import { DataGrid, GridColDef, GridRowModel } from '@mui/x-data-grid';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -11,14 +11,17 @@ import Divider from '@mui/material/Divider';
 import ChargingHistory from './ChargingHistory';
 import { format_time } from '../common/utils';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import BalanzAPI from '../services/balanz_api';
 import { useTheme } from "@mui/material/styles";
 import CableIcon from '@mui/icons-material/Cable';
 import { Gauge } from '@mui/x-charts/Gauge';
-
+import Snackbar from '@mui/material/Snackbar';
 
 interface ChargingStatusTableProps {
   group: GROUP;
   chargerData: Array<CHARGER>;
+  userType: string;
+  api: BalanzAPI;
 };
 
 type CONNECTOR_DATA = {
@@ -39,9 +42,18 @@ type CONNECTOR_DATA = {
 
 type CONNECTOR_STATES = Map<string, number>;
 
-const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, chargerData}) => {
+const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, chargerData, userType, api}) => {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
   const [connectorData, setConnectorData] = useState<Array<CONNECTOR_DATA>>([]);
   const [connectorStates, setConnectorStates] = useState<CONNECTOR_STATES>(new Map());
+
+  const snack = (message: string) => {
+    setMessage(message);
+    setOpen(true);
+  };
+
+  const handleClose = () => {setOpen(false)};
 
   function get_max_allocation(max_alloc: Array<Record<number, number>>): number {
     let max = 0;
@@ -140,7 +152,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
     { field: 'id', headerName: 'ID', flex: 3},
     { field: 'alias', headerName: 'Alias', flex: 1.4},
     { field: 'status', headerName: 'Status', flex: 2.2, valueGetter: (value) => { return value == 'None'? 'Unknown': value}},
-    { field: 'priority', headerName: 'Priority', flex: 1, type: 'number' },
+    { field: 'priority', headerName: 'Priority', flex: 1, type: 'number', editable: true },
     { field: 'id_tag', headerName: 'Tag', flex: 2.5},
     { field: 'user_name', headerName: 'User', flex: 2},
     { field: 'start_time', headerName: 'Started', flex: 2.4},
@@ -169,109 +181,142 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
     },
   ];
 
+  const processRowUpdate = useCallback(
+    async (updatedRow: GridRowModel, originalRow: GridRowModel) => {
+      console.log(updatedRow);
+      const payload = {"charger_id": updatedRow.id.split("/")[0], "connector_id": parseInt(updatedRow.id.split("/")[1])}
+      for (const [key, value] of Object.entries(updatedRow)) {
+        if (value != originalRow[key]) {
+          // @ts-expect-error Much easier this way
+          payload[key] = value;
+        }
+      }
+      console.log(payload);
+  
+      const [ok,] = await api.call("SetChargePriority", payload);
+      if (ok == 3) {
+        snack("Succesfully updated priority");
+        return updatedRow;
+      } else {
+        snack("Error updating priority");
+        return originalRow;
+      }
+  }, [api]
+  );
+  
   return (
-    <Accordion key={group.group_id} slotProps={{ transition: { timeout: 0 }}}>
-    <AccordionSummary
-      expandIcon={<ArrowDropDownIcon />}
-      sx={{fontSize: '.9rem', mt: 2}}
-    >
-        <Stack alignItems="center" sx={{ width: '100%' }} direction="row" gap={1} divider={<Divider orientation="vertical" />}>
-          <Stack alignItems="left" gap={0}>
-            {group.group_id}
-            <Gauge width={70} height={70} value={group.offered} valueMin={0} valueMax={get_max_allocation(group.max_allocation_now)} startAngle={-90} endAngle={90}
-              margin={{
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-              }}
-              text={
-                ({ value, valueMax }) => `${value}/${valueMax} A`
-             }
-              /> 
-          </Stack>
-          {/* 
-          <Stack direction="row" alignItems="center" gap={1} >
-            <EvStation color="info" sx={{ scale: '1'}}/> {chargerData.length}
-          </Stack> 
-          */}
-          <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
-            <Stack>
-              <Stack direction="row" alignItems="center" gap={1} useFlexGap>
-                <ElectricalServicesIcon color='info' sx={{ scale: '1' }}/> {connectorData.length} 
+    <Stack>
+      <Accordion key={group.group_id} slotProps={{ transition: { timeout: 0 }}}>
+      <AccordionSummary
+        expandIcon={<ArrowDropDownIcon />}
+        sx={{fontSize: '.9rem', mt: 2}}
+      >
+          <Stack alignItems="center" sx={{ width: '100%' }} direction="row" gap={1} divider={<Divider orientation="vertical" />}>
+            <Stack alignItems="left" gap={0}>
+              {group.group_id}
+              <Gauge width={70} height={70} value={group.offered} valueMin={0} valueMax={get_max_allocation(group.max_allocation_now)} startAngle={-90} endAngle={90}
+                margin={{
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                }}
+                text={
+                  ({ value, valueMax }) => `${value}/${valueMax} A`
+              }
+                /> 
+            </Stack>
+            {/* 
+            <Stack direction="row" alignItems="center" gap={1} >
+              <EvStation color="info" sx={{ scale: '1'}}/> {chargerData.length}
+            </Stack> 
+            */}
+            <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+              <Stack>
+                <Stack direction="row" alignItems="center" gap={1} useFlexGap>
+                  <ElectricalServicesIcon color='info' sx={{ scale: '1' }}/> {connectorData.length} 
+                </Stack>
+                Total
               </Stack>
-              Total
+            </Stack>
+            <Stack>
+              <Stack direction="row" alignItems="center" gap={1}>
+                <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Available") ?? 0} 
+              </Stack> 
+              Available
+            </Stack>
+            <Stack>
+              <Stack direction="row" alignItems="center" gap={1} >
+                <ElectricalServicesIcon color='warning' sx={{ scale: '1' }}/> {connectorStates.get("Charging") ?? 0}
+              </Stack> 
+              Charging
+            </Stack>
+            <Stack>
+              <Stack direction="row" alignItems="center" gap={1} >
+                <ElectricalServicesIcon color='primary' sx={{ scale: '1' }}/> {connectorStates.get("SuspendedEV") ?? 0} 
+              </Stack> 
+              SuspendedEV
+            </Stack>
+            <Stack>
+              <Stack direction="row" alignItems="center" gap={1} >
+                <ElectricalServicesIcon color='secondary' sx={{ scale: '1' }}/> {connectorStates.get("SuspendedEVSE") ?? 0}
+              </Stack> 
+              SuspendedEVSE
+            </Stack>
+            <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+              <Stack direction="row" alignItems="center" gap={1} >
+                <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Preparing") ?? 0} 
+              </Stack> 
+              Preparing 
+            </Stack>
+            <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+              <Stack direction="row" alignItems="center" gap={1} >
+                <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Finishing") ?? 0} 
+              </Stack> 
+              Finishing
+            </Stack>
+            <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+              <Stack direction="row" alignItems="center" gap={1} >
+                <ElectricalServicesIcon color='error' sx={{ scale: '1' }}/> {connectorStates.get("None") ?? 0} 
+              </Stack> 
+              Unknown
             </Stack>
           </Stack>
-          <Stack>
-            <Stack direction="row" alignItems="center" gap={1}>
-              <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Available") ?? 0} 
-            </Stack> 
-            Available
-          </Stack>
-          <Stack>
-            <Stack direction="row" alignItems="center" gap={1} >
-              <ElectricalServicesIcon color='warning' sx={{ scale: '1' }}/> {connectorStates.get("Charging") ?? 0}
-            </Stack> 
-            Charging
-          </Stack>
-          <Stack>
-            <Stack direction="row" alignItems="center" gap={1} >
-              <ElectricalServicesIcon color='primary' sx={{ scale: '1' }}/> {connectorStates.get("SuspendedEV") ?? 0} 
-            </Stack> 
-            SuspendedEV
-          </Stack>
-          <Stack>
-            <Stack direction="row" alignItems="center" gap={1} >
-              <ElectricalServicesIcon color='secondary' sx={{ scale: '1' }}/> {connectorStates.get("SuspendedEVSE") ?? 0}
-            </Stack> 
-            SuspendedEVSE
-          </Stack>
-          <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
-            <Stack direction="row" alignItems="center" gap={1} >
-              <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Preparing") ?? 0} 
-            </Stack> 
-            Preparing 
-          </Stack>
-          <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
-            <Stack direction="row" alignItems="center" gap={1} >
-              <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Finishing") ?? 0} 
-            </Stack> 
-            Finishing
-          </Stack>
-          <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
-            <Stack direction="row" alignItems="center" gap={1} >
-              <ElectricalServicesIcon color='error' sx={{ scale: '1' }}/> {connectorStates.get("None") ?? 0} 
-            </Stack> 
-            Unknown
-          </Stack>
-        </Stack>
-    </AccordionSummary>
-    <AccordionDetails sx={{mx: 0, px: 0, width: '100%'}}>
-      <DataGrid 
-        hideFooterPagination={true}
-        hideFooter={true}
-        rows={connectorData}
-        columns={columns}
-        density="compact"
-        sx={{fontSize: '.8rem', width: '100%'}}
-        initialState={{
-          sorting: {
-            sortModel: [{ field: 'alias', sort: 'asc' }],
-          },
-          columns: {
-            columnVisibilityModel: {
-              network_connected: fullWidth,
-              id: fullWidth,
-              priority: fullWidth,
-              id_tag: fullWidth,
-              usage_meter_kw: fullWidth
+      </AccordionSummary>
+      <AccordionDetails sx={{mx: 0, px: 0, width: '100%'}}>
+        <DataGrid 
+          hideFooterPagination={true}
+          hideFooter={true}
+          rows={connectorData}
+          columns={columns}
+          density="compact"
+          sx={{fontSize: '.8rem', width: '100%'}}
+          isCellEditable={(params) => ['Charging', 'SuspendedEV', 'SuspenededEVSE'].includes(params.row.status) && !(['Status', 'Analysis'].includes(userType))}
+          processRowUpdate={processRowUpdate}
+          initialState={{
+            sorting: {
+              sortModel: [{ field: 'alias', sort: 'asc' }],
             },
-          },
-        }}
-      />
-    </AccordionDetails>
-  </Accordion>
+            columns: {
+              columnVisibilityModel: {
+                network_connected: fullWidth,
+                id: fullWidth,
+                priority: fullWidth,
+                id_tag: fullWidth,
+                usage_meter_kw: fullWidth
+              },
+            },
+          }}
+        />
+      </AccordionDetails>
+    </Accordion>
+    <Snackbar
+      open={open}
+      autoHideDuration={4000}
+      onClose={handleClose}
+      message={message}
+    />
+  </Stack>
   );
 };
 

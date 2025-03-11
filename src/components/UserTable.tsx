@@ -9,7 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
-interface TagTableProps {
+interface UserTableProps {
   api: BalanzAPI;
 };
 

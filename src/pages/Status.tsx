@@ -8,9 +8,10 @@ import ChargingStatusTable from '../components/ChargingStatusTable';
 
 interface StatusProp {
   api: BalanzAPI;
+  userType: string;
 }
 
-const Status: React.FC<StatusProp> = ({ api }) => {
+const Status: React.FC<StatusProp> = ({ api, userType }) => {
   const [groupData, setGroupData] = useState<Array<GROUP>>([]);
 
   const getGroups = (api: BalanzAPI) => {
@@ -43,7 +44,7 @@ const Status: React.FC<StatusProp> = ({ api }) => {
   ) : (
     <Container maxWidth={false} sx={{ mt: 2 }}>
       {groupData.map((group) => (
-        <ChargingStatusTable key={group.group_id} group={group} chargerData={group.chargers} />
+        <ChargingStatusTable api={api} key={group.group_id} group={group} chargerData={group.chargers} userType={userType} />
       ))}
     </Container>
   );

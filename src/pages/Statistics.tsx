@@ -1,13 +1,8 @@
 import * as React from 'react';
-import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 import BalanzAPI from '../services/balanz_api';
 import { GROUP, SESSION } from '../types/types';
-import EvStationIcon from '@mui/icons-material/EvStation';
-import { Stack } from '@mui/material';
-import { Key } from '@mui/icons-material';
-import LocationCityIcon from '@mui/icons-material/LocationCity';
 import SessionStatistics from '../components/SessionStatistics';
 
 interface StatisticsProp {

@@ -70,7 +70,7 @@ function App() {
           path="/Status"
           element={
             <>
-              <Status api={api} /> 
+              <Status userType={userType} api={api} /> 
             </>
           }
         />
@@ -86,15 +86,24 @@ function App() {
   return  (
     <Container maxWidth={false} disableGutters>
         <Routes>
-            <Route
-              path="/Statistics"
+          <Route 
+              path="/Status"
               element={
                 <>
-                  <ResponsiveAppBar userType={userType}/>
-                  <Statistics api={api} />
+                  <ResponsiveAppBar  userType={userType}/>
+                  <Status userType={userType} api={api} /> 
                 </>
               }
             />
+          <Route
+            path="/Statistics"
+            element={
+              <>
+                <ResponsiveAppBar userType={userType}/>
+                <Statistics api={api} />
+              </>
+            }
+          />
           <Route
             path="/Chargers"
             element={
@@ -119,15 +128,6 @@ function App() {
               <>
                 <ResponsiveAppBar  userType={userType}/>
                 <Tags api={api} />
-              </>
-            }
-          />
-          <Route 
-            path="/Status"
-            element={
-              <>
-                <ResponsiveAppBar  userType={userType}/>
-                <Status api={api} /> 
               </>
             }
           />
