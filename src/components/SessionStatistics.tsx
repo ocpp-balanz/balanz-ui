@@ -52,10 +52,14 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       for (let ci = 0; ci < sessionData[i].charging_history.length; ci++) {
         // Work out how long this interval is.
         let seconds = 0;
-        if (ci == sessionData[i].charging_history.length - 1)
-          seconds = sessionData[i].end_time - sessionData[i].charging_history[ci].timestamp;
-        else
+        if (ci == sessionData[i].charging_history.length - 1) {
+          if (sessionData[i].end_time != null)
+            seconds = sessionData[i].end_time - sessionData[i].charging_history[ci].timestamp;
+          else
+            seconds = 0;
+        } else {
           seconds = sessionData[i].charging_history[ci + 1].timestamp - sessionData[i].charging_history[ci].timestamp;
+        }
         if (sessionData[i].charging_history[ci].usage != null)
           usage = sessionData[i].charging_history[ci].usage;
         else if (usage == null && sessionData[i].charging_history[ci].offered != null) {
@@ -137,7 +141,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         continue;
 
       // Is the session relevant at all, time-wise? If not, quickly move on...
-      if (sessionData[i].end_time < start_date_sec)  
+      if (sessionData[i].end_time != null && sessionData[i].end_time < start_date_sec)  
         continue;
 
       // Iterate charging entries and put into the right bucket(s)
