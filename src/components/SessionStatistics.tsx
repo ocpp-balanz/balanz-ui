@@ -56,7 +56,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           if (sessionData[i].end_time != null)
             seconds = sessionData[i].end_time - sessionData[i].charging_history[ci].timestamp;
           else
-            seconds = 0;
+            seconds = Date.now() / 1000 - sessionData[i].charging_history[ci].timestamp;
         } else {
           seconds = sessionData[i].charging_history[ci + 1].timestamp - sessionData[i].charging_history[ci].timestamp;
         }
