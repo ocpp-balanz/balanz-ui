@@ -68,8 +68,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         sessionData[i].charging_history[ci].wh = (usage ?? 0) * seconds / 3600.0;
         total_wh += sessionData[i].charging_history[ci].wh ?? 0;
       }
-      if (sessionData[i].charging_history.length > 0)
-        sessionData[i].charging_history[sessionData[i].charging_history.length - 1].wh = 0.0;
 
       if (total_wh != 0) {
         // Adjust proportionally to make sure energy total is correct. 
@@ -127,9 +125,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       now.setMinutes(0, 0, 0);
       now = new Date(now.getTime() + 60 * 60 * 1000);
       start_date = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      let next_date = null;    
-      for (let date = start_date; date <= now; date = next_date) {
-        next_date = new Date(date.getTime() + 60 * 60 * 1000);
+      for (let date = start_date; date <= now; date = new Date(date.getTime() + 60 * 60 * 1000)) {
         result.push({x: date.getHours().toString(), energy: 0, timestamp: date});
       } 
     }
@@ -145,9 +141,17 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         continue;
 
       // Iterate charging entries and put into the right bucket(s)
-      for (let ci = 0; ci < sessionData[i].charging_history.length - 1; ci++) {
+      for (let ci = 0; ci < sessionData[i].charging_history.length; ci++) {
         const start = sessionData[i].charging_history[ci].date??new Date();
-        const end = sessionData[i].charging_history[ci + 1].date??new Date();
+        let end = null;
+        if (ci == sessionData[i].charging_history.length - 1) {
+          if (sessionData[i].end_time != null)
+            end = new Date(sessionData[i].end_time * 1000);
+          else
+            end = new Date();
+        } else {
+          end = sessionData[i].charging_history[ci + 1].date??new Date();
+        }
         if (start == end)
           continue;   // Same second admin type entry - skip it.
 
@@ -155,14 +159,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         for (let bucket_index = 0; bucket_index < result.length - 1; bucket_index++) {
           const bstart = result[bucket_index].timestamp;
           const bend = result[bucket_index + 1].timestamp;
-
-          // Done?
-          if (bstart > end)
-            break;
-
-          // Check for no overlap/not at start yet.
-          if (start > bend)
-            continue;  
 
           // How much overlap
           const overlap_ms = Math.min(end.getTime(), bend.getTime()) - Math.max(start.getTime(), bstart.getTime());
@@ -174,8 +170,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           result[bucket_index].energy += contrib_wh / 1000.0; 
           remain -= contrib_wh;
         }
-//        if (remain > 0)
-//          console.log("Warning. Left remain", remain);
       }
     }
     setDataset(result);
