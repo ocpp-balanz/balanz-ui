@@ -14,9 +14,10 @@ export interface RemoteStopProp {
   charger_alias: string;
   connector_id: number;
   transaction_id: number;
+  snack: Function;
 }
 
-const RemoteStop: React.FC<RemoteStopProp> = ({api, charger_id, charger_alias, connector_id, transaction_id}) => {
+const RemoteStop: React.FC<RemoteStopProp> = ({api, charger_id, charger_alias, connector_id, transaction_id, snack}) => {
   const [open, setOpen] = useState<boolean>(false);
 
   const handleClickOpen = () => {
@@ -31,9 +32,9 @@ const RemoteStop: React.FC<RemoteStopProp> = ({api, charger_id, charger_alias, c
     handleClose();
     const [ok,] = await api.call("RemoteStopTransaction", {charger_id: charger_id, connector_id: connector_id, transaction_id: transaction_id});
     if (ok) {
-      console.log("Remote stop successful");
+      snack("Remote stop successful - status may take a while to update");
     } else {
-      console.error("Remote stop failed");
+      snack("Remote stop failed");
     }
   }
 

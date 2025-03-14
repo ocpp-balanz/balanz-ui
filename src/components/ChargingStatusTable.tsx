@@ -180,7 +180,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
     },
     { field: 'remotestop', headerName: '',
       renderCell: (params) => {
-        if (userType == 'Admin' && ['Charging', 'SuspendedEV', 'SuspendedEVSE'].includes(params.row.status))
+        if (userType == 'Admin' && ['Charging', 'SuspendedEV', 'SuspendedEVSE'].includes(params.row.status) && params.row.id_tag != null)
           return (
             <RemoteStop 
               api={api} 
@@ -188,6 +188,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
               charger_alias={params.row.alias} 
               connector_id={parseInt(params.row.id.split("/")[1])}
               transaction_id={parseInt(params.row.id.split("/")[1])}
+              snack={snack}
             />
           );
         else 
@@ -327,7 +328,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
     </Accordion>
     <Snackbar
       open={open}
-      autoHideDuration={4000}
+      autoHideDuration={6000}
       onClose={handleClose}
       message={message}
     />
