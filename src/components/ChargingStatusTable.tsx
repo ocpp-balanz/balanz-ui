@@ -16,6 +16,7 @@ import { useTheme } from "@mui/material/styles";
 import CableIcon from '@mui/icons-material/Cable';
 import { Gauge } from '@mui/x-charts/Gauge';
 import Snackbar from '@mui/material/Snackbar';
+import RemoteStop from './RemoteStop';
 
 interface ChargingStatusTableProps {
   group: GROUP;
@@ -175,7 +176,23 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
           return (
           <ChargingHistory headline={"Charging History for " + params.row.id + " (" + params.row.alias + "). Start: " + params.row.start_time} 
             history={history_data} />);
-      }, flex: 1,
+      }, flex: .3,
+    },
+    { field: 'remotestop', headerName: '',
+      renderCell: (params) => {
+        if (userType == 'Admin' && ['Charging', 'SuspendedEV', 'SuspendedEVSE'].includes(params.row.status))
+          return (
+            <RemoteStop 
+              api={api} 
+              charger_id={params.row.id.split("/")[0]} 
+              charger_alias={params.row.alias} 
+              connector_id={parseInt(params.row.id.split("/")[1])}
+              transaction_id={parseInt(params.row.id.split("/")[1])}
+            />
+          );
+        else 
+          return (<></>);
+       }, flex: .3,
     },
   ];
 
@@ -290,7 +307,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
           columns={columns}
           density="compact"
           sx={{fontSize: '.8rem', width: '100%'}}
-          isCellEditable={(params) => ['Charging', 'SuspendedEV', 'SuspenededEVSE'].includes(params.row.status) && !(['Status', 'Analysis'].includes(userType))}
+          isCellEditable={(params) => ['Charging', 'SuspendedEV', 'SuspendedEVSE'].includes(params.row.status) && !(['Status', 'Analysis'].includes(userType))}
           processRowUpdate={processRowUpdate}
           initialState={{
             sorting: {
