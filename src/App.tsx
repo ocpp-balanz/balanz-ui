@@ -17,10 +17,10 @@ import './App.css'
 
 const api_url: string = import.meta.env.VITE_BALANZ_URL ?? 'ws://localhost:9999/api';
 console.log("Setting balanz URL to", api_url);
+const api = new BalanzAPI(api_url);
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
-  const [api, _] = useState<BalanzAPI>(new BalanzAPI(api_url));
   const [token, setToken] = useState<string>("");
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [userType, setUserType] = useState<string>("");
