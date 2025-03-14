@@ -75,7 +75,7 @@ const App: React.FC<AppProp> = ({ api }) => {
       <Routes>
           <Route path="/Status" element={<Status userType={userType} api={api} />} />
           <Route path="/Statistics" element={<Statistics api={api} />} />
-          <Route path="/Chargers" element={<Chargers api={api} />} />
+          <Route path="/Chargers" element={<Chargers userType={userType} api={api} />} />
           <Route path="/Groups" element={<Groups api={api} />} />
           <Route path="/Tags" element={<Tags api={api} />} />
           <Route path="/Sessions" element={<Sessions api={api} />} />

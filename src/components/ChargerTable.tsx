@@ -6,12 +6,14 @@ import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, Gr
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Snackbar from '@mui/material/Snackbar';
+import ResetCharger from './ResetCharger';
 
 interface ChargerTableProps {
   api: BalanzAPI;
+  userType: string;
 };
 
-const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
+const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
   const [chargerData, setChargerData] = useState<Array<CHARGER>>([]);
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
@@ -70,6 +72,21 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api}) => {
     { field: 'no_connectors', headerName: '# Connectors', flex: 1, type: 'number', valueGetter: (_, charger) => {
         return Object.keys(charger["connectors"]).length;
       }
+    },
+    { field: 'remotestop', headerName: '',
+      renderCell: (params) => {
+        if (userType == 'Admin')
+          return (
+            <ResetCharger 
+              api={api} 
+              charger_id={params.row.charger_id} 
+              charger_alias={params.row.alias} 
+              snack={snack}
+            />
+          );
+        else 
+          return (<></>);
+      }, flex: .3
     }
   ];
 
