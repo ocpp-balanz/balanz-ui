@@ -15,11 +15,11 @@ import Users from './pages/Users';
 
 import './App.css'
 
-const api_url: string = import.meta.env.VITE_BALANZ_URL ?? 'ws://localhost:9999/api';
-console.log("Setting balanz URL to", api_url);
-const api = new BalanzAPI(api_url);
+interface AppProp {
+  api: BalanzAPI;
+}
 
-function App() {
+const App: React.FC<AppProp> = ({ api }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [token, setToken] = useState<string>("");
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
@@ -48,7 +48,7 @@ function App() {
     }
     doLogin();
   }, 
-  [token, api]);
+  [token]);
 
   if (loading)
       return (<Loader />);
