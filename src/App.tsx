@@ -80,7 +80,7 @@ const App: React.FC<AppProp> = ({ api }) => {
           <Route path="/Tags" element={<Tags api={api} />} />
           <Route path="/Sessions" element={<Sessions api={api} />} />
           <Route path="/Users" element={<Users api={api} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/Status" replace />} />
       </Routes>
     </Container>
   );

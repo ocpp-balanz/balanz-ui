@@ -164,8 +164,6 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
         return value.toFixed(2);
       },
     },
-    { field: 'usage_meter_kw', headerName: 'Usage (kW)', flex: 2, type: 'number', 
-      valueGetter: (_, row) => {return row.usage_meter == null? null : (3 * 230 * row.usage_meter / 1000.0).toFixed(3)}},
     { field: 'offered', headerName: 'Offer (A)', flex: 1.5, type: 'number' },
     { field: 'energy_meter', headerName: 'Energy (kWh)', flex: 2, type: 'number', valueGetter: (value) => {return (value/1000).toFixed(3)}},
     { field: 'history', headerName: '',
