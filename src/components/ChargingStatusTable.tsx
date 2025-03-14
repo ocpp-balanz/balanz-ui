@@ -319,7 +319,8 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
                 network_connected: fullWidth,
                 id: fullWidth,
                 priority: fullWidth,
-                id_tag: fullWidth
+                id_tag: fullWidth,
+                remotestop: (userType == 'Admin')
               },
             },
           }}
