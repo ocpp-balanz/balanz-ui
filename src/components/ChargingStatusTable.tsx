@@ -301,8 +301,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
                 network_connected: fullWidth,
                 id: fullWidth,
                 priority: fullWidth,
-                id_tag: fullWidth,
-                usage_meter_kw: fullWidth
+                id_tag: fullWidth
               },
             },
           }}
