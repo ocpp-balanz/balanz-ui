@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import App from './App';
 
-console.log("package version: ", import.meta.env.PACKAGE_VERSION);
+console.log("UI version: ", import.meta.env.PACKAGE_VERSION);
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

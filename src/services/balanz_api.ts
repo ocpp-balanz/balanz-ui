@@ -8,19 +8,12 @@ export default class BalanzAPI {
     outstanding_calls: Map<string, CallFunction>;
     logged_in: boolean;
     logged_in_user_type: string;
-    dummy: boolean;
 
     constructor(url: string) {
         this.ws = new WebSocket(url, ["ocpp1.6"]);
         this.outstanding_calls = new Map<string, CallFunction>();
         this.logged_in = false;
         this.logged_in_user_type = "";
-        if (url == "") {
-            console.log('dummy BalanzAPI constructor');
-            this.dummy = true;
-            return;
-        }
-        this.dummy = false;
 
         this.ws.onclose = () => {
             console.log('balanz WebSocket closed');

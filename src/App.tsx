@@ -15,9 +15,12 @@ import Users from './pages/Users';
 
 import './App.css'
 
+const api_url: string = import.meta.env.VITE_BALANZ_URL ?? 'ws://localhost:9999/api';
+console.log("Setting balanz URL to", api_url);
+
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
-  const [api, setApi] = useState<BalanzAPI>(new BalanzAPI(""));
+  const [api, _] = useState<BalanzAPI>(new BalanzAPI(api_url));
   const [token, setToken] = useState<string>("");
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [userType, setUserType] = useState<string>("");
@@ -33,15 +36,8 @@ function App() {
   }, []);
 
   useMemo(() => {
-    console.log("Connecting VITE_BALANZ_URL", import.meta.env.VITE_BALANZ_URL);
-    const api_url: string = import.meta.env.VITE_BALANZ_URL ?? 'ws://localhost:9999/api';
-    console.log("Setting balanz URL to", api_url);
-    setApi(new BalanzAPI(api_url));
-  }, []);
-
-  useMemo(() => {
     const doLogin = async() => {
-      if (token != "" && !api.dummy) {
+      if (token != "" && api) {
         const user_type = await api.login(token);
         if (user_type != "") {
           setUserType(user_type);
