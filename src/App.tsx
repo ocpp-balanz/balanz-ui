@@ -62,18 +62,8 @@ function App() {
     return (
     <Container maxWidth={false} disableGutters>
       <Routes>
-        <Route 
-          path="/Status"
-          element={
-            <>
-              <Status userType={userType} api={api} /> 
-            </>
-          }
-        />
-        <Route
-          path="*"
-          element={<Navigate to="/Status" replace />}
-        />
+        <Route path="/Status" element={<Status userType={userType} api={api} />} />
+        <Route path="*" element={<Navigate to="/Status" replace />} />
       </Routes>
     </Container>
     );
@@ -81,75 +71,17 @@ function App() {
 
   return  (
     <Container maxWidth={false} disableGutters>
-        <Routes>
-          <Route 
-              path="/Status"
-              element={
-                <>
-                  <ResponsiveAppBar  userType={userType}/>
-                  <Status userType={userType} api={api} /> 
-                </>
-              }
-            />
-          <Route
-            path="/Statistics"
-            element={
-              <>
-                <ResponsiveAppBar userType={userType}/>
-                <Statistics api={api} />
-              </>
-            }
-          />
-          <Route
-            path="/Chargers"
-            element={
-              <>
-                <ResponsiveAppBar  userType={userType}/>
-                <Chargers api={api} />
-              </>
-            }
-          />
-          <Route
-            path="/Groups"
-            element={
-              <>
-                <ResponsiveAppBar  userType={userType}/>
-                <Groups api={api} />
-              </>
-            }
-          />
-          <Route
-            path="/Tags"
-            element={
-              <>
-                <ResponsiveAppBar  userType={userType}/>
-                <Tags api={api} />
-              </>
-            }
-          />
-          <Route 
-            path="/Sessions"
-            element={
-              <>
-                <ResponsiveAppBar  userType={userType}/>
-                <Sessions api={api} /> 
-              </>
-            }
-          />
-          <Route 
-            path="/Users"
-            element={
-              <>
-                <ResponsiveAppBar  userType={userType}/>
-                <Users api={api} /> 
-              </>
-            }
-          />
-          <Route
-            path="*"
-            element={<Navigate to="/Status" replace />}
-          />
-        </Routes>
+      <ResponsiveAppBar  userType={userType}/>
+      <Routes>
+          <Route path="/Status" element={<Status userType={userType} api={api} />} />
+          <Route path="/Statistics" element={<Statistics api={api} />} />
+          <Route path="/Chargers" element={<Chargers api={api} />} />
+          <Route path="/Groups" element={<Groups api={api} />} />
+          <Route path="/Tags" element={<Tags api={api} />} />
+          <Route path="/Sessions" element={<Sessions api={api} />} />
+          <Route path="/Users" element={<Users api={api} />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </Container>
   );
 }
