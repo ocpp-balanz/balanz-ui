@@ -29,6 +29,23 @@ npm run build
 npm run preview
 ```
 
+## Building Static files for Production
+
+To build the UI into a small set of static HTML/JS files, first put the following line into a new file `.env` in the root directory:
+
+```text
+VITE_BALANZ_URL=wss://(balanz-server:port))/api
+```
+
+Then, run:
+
+```text
+npm run build
+```
+
+This will create a folder called `dist`. This contains all static files that can be served by any web-server, e.g., Apache or Nginx.
+The `index.html` file is naturally the entry point.
+
 
 ## Docker
 
