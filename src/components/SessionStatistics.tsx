@@ -3,11 +3,14 @@ import { useEffect, useState } from 'react';
 import { SESSION, GROUP } from '../types/types';
 import { BarChart } from '@mui/x-charts/BarChart';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, GridToolbarExport} from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarExport, GridSlotsComponentsProps } from '@mui/x-data-grid';
+import { Divider } from '@mui/material';
+
 
 interface SessionStatisticsProps {
   sessionData: Array<SESSION>;
@@ -21,10 +24,11 @@ type DATAENTRY = {
   energy: number;
 };
 
-const columns: GridColDef<(DATAENTRY)[]>[] = [
-  { field: 'id', headerName: 'Timestamp', flex: 2},
-  { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value) => {return (value/1).toFixed(3)}, flex: 1},
-];
+declare module '@mui/x-data-grid' {
+  interface FooterPropsOverrides {
+    total: number;
+  }
+}
 
 function CustomToolbar() {
   return (
@@ -39,6 +43,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   const [period, setPeriod] = useState<string>('month');
   const [group, setGroup] = useState<string>('(all)');
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
+  const [total, setTotal] = useState<number>(0);
   const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
 
   const handlePeriodChange = (event: SelectChangeEvent) => {
@@ -58,6 +63,35 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
       ('0' + date.getDate()).slice(-2);
   }
+
+  const columns: GridColDef<DATAENTRY>[] = [
+    { field: 'id', headerName: 'Timestamp', flex: 2},
+    { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value) => {return (value/1).toFixed(3)}, flex: 1},
+  ];
+  
+  function CustomFooterComponent(
+    props: NonNullable<GridSlotsComponentsProps['footer']>,
+  ) {
+    return (
+      <>
+        <Divider />
+        <Stack direction="row" sx={{ mx: 1.1, my: 1}}>
+          <b>Total</b>
+          <Box sx={{ flexGrow: 1 }} />
+          {props.total?.toFixed(3)}
+        </Stack>
+      </>
+    );
+  }
+    
+  useEffect(() => {
+    let sum = 0;
+    for (let i = 0; i < dataset.length; i++)
+      sum += dataset[i].energy;
+    console.log("sum", sum);
+    setTotal(sum);
+  }, 
+  [dataset]);
 
   // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
   // a net Wh usage value will be added.
@@ -237,16 +271,17 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         width={800}
         height={400}
       />
-        <DataGrid 
-          hideFooterPagination={true}
-          hideFooter={true}
-          rows={dataset}
-          // @ts-expect-error Much easier this way
-          columns={columns}
-          density="compact"
-          sx={{fontSize: '.8rem', width:300}}
-          slots={{ toolbar: CustomToolbar }}
-        />
+      <DataGrid 
+        hideFooterPagination={true}
+        rows={dataset}
+        columns={columns}
+        density="compact"
+        sx={{fontSize: '.8rem', width:300}}
+        slots={{ toolbar: CustomToolbar, footer: CustomFooterComponent }}
+        slotProps={{
+          footer: { total }
+        }}
+      />
     </Box>
 
   );
