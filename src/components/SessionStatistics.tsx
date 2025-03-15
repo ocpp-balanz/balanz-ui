@@ -66,7 +66,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
 
   const columns: GridColDef<DATAENTRY>[] = [
     { field: 'id', headerName: 'Timestamp', flex: 2},
-    { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value) => {return (value/1).toFixed(3)}, flex: 1},
+    { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value) => {return (value/1).toFixed(3)}, flex: 2},
   ];
   
   function CustomFooterComponent(
@@ -88,7 +88,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     let sum = 0;
     for (let i = 0; i < dataset.length; i++)
       sum += dataset[i].energy;
-    console.log("sum", sum);
     setTotal(sum);
   }, 
   [dataset]);
@@ -276,7 +275,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         rows={dataset}
         columns={columns}
         density="compact"
-        sx={{fontSize: '.8rem', width:300}}
+        sx={{fontSize: '.8rem', width:250}}
         slots={{ toolbar: CustomToolbar, footer: CustomFooterComponent }}
         slotProps={{
           footer: { total }
