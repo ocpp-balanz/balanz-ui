@@ -7,6 +7,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, GridToolbarExport} from '@mui/x-data-grid';
 
 interface SessionStatisticsProps {
   sessionData: Array<SESSION>;
@@ -14,10 +15,25 @@ interface SessionStatisticsProps {
 };
 
 type DATAENTRY = {
+  id: string;
   timestamp: Date;
   x: string;
   energy: number;
 };
+
+const columns: GridColDef<(DATAENTRY)[]>[] = [
+  { field: 'id', headerName: 'Timestamp', flex: 2},
+  { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value) => {return (value/1).toFixed(3)}, flex: 1},
+];
+
+function CustomToolbar() {
+  return (
+    <GridToolbarContainer>
+      <Box sx={{ flexGrow: 1 }} />
+      <GridToolbarExport/>
+    </GridToolbarContainer>
+  );
+}
 
 const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, groupData}) => {
   const [period, setPeriod] = useState<string>('month');
@@ -35,6 +51,12 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
 
   function tomorrow(date: Date): Date {
     return new Date(date.getTime() + 60 * 60 * 24 * 1000);
+  }
+
+  function format_date(date: Date): string {
+    return date.getFullYear() + '-' +
+      ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+      ('0' + date.getDate()).slice(-2);
   }
 
   // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
@@ -95,7 +117,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     let midnight = new Date();
     midnight.setHours(0, 0, 0, 0);
     midnight = tomorrow(midnight);
-    console.log("Midnight (next)", midnight);
 
     // First prepare the array ("buckets") ..
     const result: Array<DATAENTRY> = [];
@@ -111,22 +132,22 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       let next_date = null;    
       for (let date = start_date; date <= midnight; date = next_date) {
         next_date = tomorrow(date);
-        result.push({x: date.getDate().toString(), energy: 0, timestamp: date});
+        result.push({id: format_date(date), x: date.getDate().toString(), energy: 0, timestamp: date});
       }
     } else if (period == "7days") {
       start_date = new Date(midnight.getTime() - 24 * 7 * 60 * 60 * 1000);
       let next_date = null;    
       for (let date = start_date; date <= midnight; date = next_date) {
         next_date = tomorrow(date);
-        result.push({x: date.getDate().toString(), energy: 0, timestamp: date});
+        result.push({id: format_date(date), x: date.getDate().toString(), energy: 0, timestamp: date});
       } 
     } else if (period == "24hours") {
       let now = new Date();
       now.setMinutes(0, 0, 0);
       now = new Date(now.getTime() + 60 * 60 * 1000);
-      start_date = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      start_date = new Date(now.getTime() - 23 * 60 * 60 * 1000);
       for (let date = start_date; date <= now; date = new Date(date.getTime() + 60 * 60 * 1000)) {
-        result.push({x: date.getHours().toString(), energy: 0, timestamp: date});
+        result.push({id: date.getHours().toString(), x: date.getHours().toString(), energy: 0, timestamp: date});
       } 
     }
 
@@ -215,7 +236,17 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         series={[{ dataKey: 'energy', label: "Energy (kWh)"}]}
         width={800}
         height={400}
-      /> 
+      />
+        <DataGrid 
+          hideFooterPagination={true}
+          hideFooter={true}
+          rows={dataset}
+          // @ts-expect-error Much easier this way
+          columns={columns}
+          density="compact"
+          sx={{fontSize: '.8rem', width:300}}
+          slots={{ toolbar: CustomToolbar }}
+        />
     </Box>
 
   );
