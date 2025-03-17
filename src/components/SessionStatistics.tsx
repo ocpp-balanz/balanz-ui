@@ -245,7 +245,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     // The last bucket is not filled. Let's remove it
     if (result.length > 0)
       result.pop();
-    console.log(result);
 
     setDataset(result);
   }, 
