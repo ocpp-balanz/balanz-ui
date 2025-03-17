@@ -176,24 +176,26 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     // Prepare the array ("buckets") ..
     const result: Array<DATAENTRY> = [];
 
+    let end_date = startDate;  // Overwritten below
+
     // Daily itervals
     if (period == 'month' || period == 'lastmonth') {
-      let end_date = startDate.add(1, 'month');
+      end_date = startDate.add(1, 'month');
       for (let date = startDate; date <= end_date; date = date.add(1, 'day')) {
         result.push({id: date.format('YYYY-MM-DD'), x: date.format('DD'), energy: 0, timestamp: date.toDate()});
       }
     } else if (period == "48hours" || period == "last48hours") {
-      let end_date = startDate.add(48, 'hours');
+      end_date = startDate.add(48, 'hours');
       for (let date = startDate; date <= end_date; date = date.add(1, 'hour')) {
         result.push({id: date.format('YYYY-MM-DD-HH'), x: date.format('DD') + '\n' + date.format('HH'), energy: 0, timestamp: date.toDate()});
       } 
     } else if (period == "year") {
-      let end_date = startDate.add(1, 'year');
+      end_date = startDate.add(1, 'year');
       for (let date = startDate; date <= end_date; date = date.add(1, 'month')) {
         result.push({id: date.format('YYYY-MM'), x: date.format('MMM'), energy: 0, timestamp: date.toDate()});
       } 
     } else if (period == "overall") {
-      let end_date = dayjs().add(1, 'year').startOf('year');
+      end_date = dayjs().add(1, 'year').startOf('year');
       for (let date = startDate; date <= end_date; date = date.add(1, 'year')) {
         result.push({id: date.format('YYYY'), x: date.format('YYYY'), energy: 0, timestamp: date.toDate()});
       } 
@@ -201,12 +203,15 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
 
     // Then add energy from sessions. 
     const start_date_sec = startDate.toDate().getTime() / 1000.0;
+    const end_date_sec = end_date.toDate().getTime() / 1000.0;
     for (let i = 0; i < sessionData.length; i++) {
       if (group != "(all)" && group != sessionData[i].group_id)
         continue;
 
       // Is the session relevant at all, time-wise? If not, quickly move on...
       if (sessionData[i].end_time != null && sessionData[i].end_time < start_date_sec)  
+        continue;
+      if (sessionData[i].start_time > end_date_sec)  
         continue;
 
       // Iterate charging entries and put into the right bucket(s)
@@ -253,7 +258,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Box>
-      <div>{startDate?.format()}</div>
       <FormControl sx={{m: 1, minWidth: 100}}>
         <InputLabel id="select-period">Period</InputLabel>
         <Select
