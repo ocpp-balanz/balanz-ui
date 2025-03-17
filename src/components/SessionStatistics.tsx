@@ -10,6 +10,10 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarExport, GridSlotsComponentsProps } from '@mui/x-data-grid';
 import { Divider } from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs, { Dayjs } from 'dayjs';
 
 
 interface SessionStatisticsProps {
@@ -40,11 +44,13 @@ function CustomToolbar() {
 }
 
 const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, groupData}) => {
-  const [period, setPeriod] = useState<string>('month');
+  const [period, setPeriod] = useState<string>('last48hours');
   const [group, setGroup] = useState<string>('(all)');
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
   const [total, setTotal] = useState<number>(0);
   const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
+  const [dateview, setDateview] = useState<Array<String>>(['year', 'month', 'day']);
+  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().subtract(48, 'hours'));
 
   const handlePeriodChange = (event: SelectChangeEvent) => {
     setPeriod(event.target.value as string);
@@ -64,6 +70,11 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       ('0' + date.getDate()).slice(-2);
   }
 
+  function format_hour_interval(date: Date): string {
+//    return date.getDate().toString() + "\n" + date.getHours().toString() + "-" + (date.getHours() == 23? "0": (date.getHours() + 1).toString());
+    return date.getDate().toString() + "\n" + date.getHours().toString();
+  }
+
   const columns: GridColDef<DATAENTRY>[] = [
     { field: 'id', headerName: 'Timestamp', flex: 2},
     { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value) => {return (value/1).toFixed(3)}, flex: 2},
@@ -78,12 +89,43 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         <Stack direction="row" sx={{ mx: 1.1, my: 1}}>
           <b>Total</b>
           <Box sx={{ flexGrow: 1 }} />
-          {props.total?.toFixed(3)}
+          <b>{props.total?.toFixed(3)}</b>
         </Stack>
       </>
     );
   }
     
+  // Set start date chooser upon new period set.
+  useEffect(() => {
+    if (period === "last48hours") {
+      setStartDate(dayjs().subtract(48, 'hours'));
+      setDateview(['year', 'month', 'day']);
+    }
+    else if (period === "48hours") {
+      setStartDate(dayjs().startOf('month').startOf('day'));
+      setDateview(['year', 'month', 'day']);
+    }
+    else if (period === 'lastmonth') {
+      setStartDate(dayjs().subtract(1, 'months').startOf('day'));
+    }
+    else if (period === 'month') {
+      setStartDate(dayjs().startOf('month').startOf('day'));
+      setDateview(['year', 'month']);
+    }
+    else if (period === 'year') {
+      setStartDate(dayjs().startOf('year').startOf('day'));
+      setDateview(['year']);
+    }
+    else if (period === 'overall') {
+      if (dataset.length > 0) {
+        setStartDate(dayjs(dataset[0].timestamp).startOf('year').startOf('day'));
+        setDateview(['year']);
+      }
+    }
+  }, 
+  [period, dataset]);
+
+  // Recalc total
   useEffect(() => {
     let sum = 0;
     for (let i = 0; i < dataset.length; i++)
@@ -145,15 +187,18 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     // Then next step is to distribute the charging entry wh values into those buckets (assuming of course
     // that the session is inside the desired overall period at all).
 
-    // Common date stuff
-    let start_date = new Date()
+    // Common date stuff - will be adjusted below
+    let start_date = new Date(); 
+    let end_date = new Date();
     let midnight = new Date();
     midnight.setHours(0, 0, 0, 0);
     midnight = tomorrow(midnight);
 
-    // First prepare the array ("buckets") ..
+    // Prepare the array ("buckets") ..
     const result: Array<DATAENTRY> = [];
-    if (period == 'month') {
+
+    // Daily itervals
+    if (period == 'month' || period == 'lastmonth') {
       // First, quite a bit of work to get to midnight one months ago
       start_date = new Date(midnight);
       const month = start_date.getMonth();
@@ -167,20 +212,20 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         next_date = tomorrow(date);
         result.push({id: format_date(date), x: date.getDate().toString(), energy: 0, timestamp: date});
       }
-    } else if (period == "7days") {
+    } else if (period == "week") {
       start_date = new Date(midnight.getTime() - 24 * 7 * 60 * 60 * 1000);
       let next_date = null;    
       for (let date = start_date; date <= midnight; date = next_date) {
         next_date = tomorrow(date);
         result.push({id: format_date(date), x: date.getDate().toString(), energy: 0, timestamp: date});
       } 
-    } else if (period == "24hours") {
+    } else if (period == "48hours") {
       let now = new Date();
       now.setMinutes(0, 0, 0);
       now = new Date(now.getTime() + 60 * 60 * 1000);
-      start_date = new Date(now.getTime() - 23 * 60 * 60 * 1000);
+      start_date = new Date(now.getTime() - 48 * 60 * 60 * 1000);
       for (let date = start_date; date <= now; date = new Date(date.getTime() + 60 * 60 * 1000)) {
-        result.push({id: date.getHours().toString(), x: date.getHours().toString(), energy: 0, timestamp: date});
+        result.push({id: format_date(date) + "-" + date.getHours().toString(), x: format_hour_interval(date), energy: 0, timestamp: date});
       } 
     }
 
@@ -231,7 +276,35 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   [period, group, sessionData, sessionAugmented]);
 
   return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Box>
+      <div>{startDate?.format()}</div>
+      <FormControl sx={{m: 1, minWidth: 100}}>
+        <InputLabel id="select-period">Period</InputLabel>
+        <Select
+          labelId="select-period"
+          id="select-period"
+          value={period}
+          label="Period"
+          onChange={handlePeriodChange}
+          sx={{fontSize: '.9rem'}}
+        >
+          <MenuItem value={'last48hours'} sx={{fontSize: '.9rem'}}>Last 48 hours</MenuItem>
+          <MenuItem value={'lastmonth'} sx={{fontSize: '.9rem'}}>Last month</MenuItem>
+          <MenuItem value={'48hours'} sx={{fontSize: '.9rem'}}>48 hours</MenuItem>
+          <MenuItem value={'month'} sx={{fontSize: '.9rem'}}>Month</MenuItem>
+          <MenuItem value={'year'} sx={{fontSize: '.9rem'}}>Year</MenuItem>
+          <MenuItem value={'overall'} sx={{fontSize: '.9rem'}}>Overall</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl sx={{m: 1, minWidth: 200}}>
+        <DatePicker 
+          views={dateview}
+          label="Start"
+          sx={{fontSize: '.9rem'}}
+          value={startDate}
+        />
+      </FormControl>
       <FormControl sx={{m: 1, minWidth: 100}}>
         <InputLabel id="select-group">Group</InputLabel>
         <Select
@@ -248,26 +321,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           ))}
         </Select>
       </FormControl>
-      <FormControl sx={{m: 1, minWidth: 100}}>
-        <InputLabel id="select-period">Period</InputLabel>
-        <Select
-          labelId="select-period"
-          id="select-period"
-          value={period}
-          label="Period"
-          onChange={handlePeriodChange}
-          sx={{fontSize: '.9rem'}}
-        >
-          <MenuItem value={'24hours'} sx={{fontSize: '.9rem'}}>Last 24 hours</MenuItem>
-          <MenuItem value={'7days'} sx={{fontSize: '.9rem'}}>Last 7 days</MenuItem>
-          <MenuItem value={'month'} sx={{fontSize: '.9rem'}}>Last month</MenuItem>
-        </Select>
-      </FormControl>
       <BarChart
         dataset={dataset}
-        xAxis={[{ scaleType: 'band', dataKey: 'x'}]}
+        xAxis={
+          [{ scaleType: 'band', dataKey: 'x'}]
+        }
         series={[{ dataKey: 'energy', label: "Energy (kWh)"}]}
-        width={800}
+        grid={{ horizontal: true }}
         height={400}
       />
       <DataGrid 
@@ -282,6 +342,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         }}
       />
     </Box>
+    </LocalizationProvider>
 
   );
 };

@@ -318,7 +318,6 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
               columnVisibilityModel: {
                 network_connected: fullWidth,
                 id: fullWidth,
-                priority: fullWidth,
                 id_tag: fullWidth,
                 remotestop: (userType == 'Admin')
               },
