@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { SESSION, GROUP } from '../types/types';
+import { SESSION, GROUP, CHARGER } from '../types/types';
 import { BarChart } from '@mui/x-charts/BarChart';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -19,6 +19,7 @@ import dayjs, { Dayjs } from 'dayjs';
 interface SessionStatisticsProps {
   sessionData: Array<SESSION>;
   groupData: Array<GROUP>;
+  chargerData: Array<CHARGER>;
 };
 
 type DATAENTRY = {
@@ -43,9 +44,10 @@ function CustomToolbar() {
   );
 }
 
-const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, groupData}) => {
+const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, groupData, chargerData}) => {
   const [period, setPeriod] = useState<string>('last48hours');
   const [group, setGroup] = useState<string>('(all)');
+  const [charger, setCharger] = useState<string>('(all)');
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
   const [total, setTotal] = useState<number>(0);
   const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
@@ -58,6 +60,11 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
 
   const handleGroupChange = (event: SelectChangeEvent) => {
     setGroup(event.target.value as string);
+    setCharger("(all)");
+  };
+
+  const handleChargerChange = (event: SelectChangeEvent) => {
+    setCharger(event.target.value as string);
   };
 
   const columns: GridColDef<DATAENTRY>[] = [
@@ -208,6 +215,9 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       if (group != "(all)" && group != sessionData[i].group_id)
         continue;
 
+      if (charger != "(all)" && charger != sessionData[i].charger_id)
+        continue;
+
       // Is the session relevant at all, time-wise? If not, quickly move on...
       if (sessionData[i].end_time != null && sessionData[i].end_time < start_date_sec)  
         continue;
@@ -253,7 +263,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
 
     setDataset(result);
   }, 
-  [period, group, sessionData, sessionAugmented, startDate]);
+  [period, group, charger, sessionData, sessionAugmented, startDate]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -303,6 +313,24 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           {groupData.map((group) => (
             <MenuItem key={group.group_id} value={group.group_id} sx={{fontSize: '.9rem'}}>{group.group_id}</MenuItem>            
           ))}
+        </Select>
+      </FormControl>
+      <FormControl sx={{m: 1, minWidth: 100}}>
+        <InputLabel id="select-charger">Charger</InputLabel>
+        <Select
+          labelId="select-charger"
+          id="select-charger"
+          value={charger}
+          label="Charger"
+          onChange={handleChargerChange}
+          sx={{fontSize: '.9rem'}}
+        >
+          <MenuItem value={'(all)'} sx={{fontSize: '.9rem'}}>(all)</MenuItem>
+          {(group != '(all)')?
+            chargerData.filter((c) => c.group_id == (group)).map((ch) => (
+              <MenuItem key={ch.charger_id} value={ch.charger_id} sx={{fontSize: '.9rem'}}>{ch.alias}</MenuItem>
+            ))
+          : ""}
         </Select>
       </FormControl>
       <BarChart

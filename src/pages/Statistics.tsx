@@ -2,7 +2,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 import BalanzAPI from '../services/balanz_api';
-import { GROUP, SESSION } from '../types/types';
+import { GROUP, SESSION, CHARGER } from '../types/types';
 import SessionStatistics from '../components/SessionStatistics';
 
 interface StatisticsProp {
@@ -11,6 +11,7 @@ interface StatisticsProp {
 
 const Statistics: React.FC<StatisticsProp> = ({ api }) => {
   const [groupData, setGroupData] = useState<Array<GROUP>>([]);
+  const [chargerData, setChargerData] = useState<Array<CHARGER>>([]);
   const [sessionData, setSessionData] = useState<Array<SESSION>>([]);
   
   const getSessions = (api: BalanzAPI) => {
@@ -46,9 +47,22 @@ const Statistics: React.FC<StatisticsProp> = ({ api }) => {
   }, 
   [api]);
 
+  // Get chargers
+  useEffect(() => {
+    const getChargers = async() => {
+      const [ok, payload] = await api.call("GetChargers", {});
+      if (ok == 3) {
+        setChargerData(payload);
+      } else {
+        console.log("Error getting chargers");
+      }
+    }
+    getChargers();
+  }, 
+  [api]);
   return (
     <Box sx={{ mt: 2 }}>
-      <SessionStatistics groupData={groupData} sessionData={sessionData} />
+      <SessionStatistics groupData={groupData} chargerData={chargerData} sessionData={sessionData} />
     </Box>
   );
 };
