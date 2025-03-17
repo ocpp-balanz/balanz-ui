@@ -23,14 +23,14 @@ const ResponsiveAppBar: React.FC<ResponsiveAppBarProps> = ({ userType }) => {
 
   return (
     <React.Fragment>
-    <AppBar position="fixed" color="success">
+    <AppBar position="fixed">
       <Container maxWidth={false}>
         <Toolbar>
-          <Box sx={{ flexGrow: 1}}>
+          <Box >
             {pages.map((page) => (
               <Button
                 key={page}
-                sx={{ my: 2, color: 'white'}}
+                sx={{ my: 1, color: 'white', font: '.9em'}}
                 component={Link}
                 to={'/' + page}
               >
