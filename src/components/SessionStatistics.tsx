@@ -278,6 +278,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       </FormControl>
       <FormControl sx={{m: 1, minWidth: 200}}>
         <DatePicker 
+          // @ts-expect-error Much easier this way
           views={dateview}
           label="Start"
           sx={{fontSize: '.9rem'}}
