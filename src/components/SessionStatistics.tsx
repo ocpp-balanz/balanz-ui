@@ -60,21 +60,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     setGroup(event.target.value as string);
   };
 
-  function tomorrow(date: Date): Date {
-    return new Date(date.getTime() + 60 * 60 * 24 * 1000);
-  }
-
-  function format_date(date: Date): string {
-    return date.getFullYear() + '-' +
-      ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
-      ('0' + date.getDate()).slice(-2);
-  }
-
-  function format_hour_interval(date: Date): string {
-//    return date.getDate().toString() + "\n" + date.getHours().toString() + "-" + (date.getHours() == 23? "0": (date.getHours() + 1).toString());
-    return date.getDate().toString() + "\n" + date.getHours().toString();
-  }
-
   const columns: GridColDef<DATAENTRY>[] = [
     { field: 'id', headerName: 'Timestamp', flex: 2},
     { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value) => {return (value/1).toFixed(3)}, flex: 2},
@@ -98,7 +83,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   // Set start date chooser upon new period set.
   useEffect(() => {
     if (period === "last48hours") {
-      setStartDate(dayjs().subtract(48, 'hours'));
+      setStartDate(dayjs().subtract(47, 'hours').startOf('hour'));
       setDateview(['year', 'month', 'day']);
     }
     else if (period === "48hours") {
@@ -106,11 +91,12 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       setDateview(['year', 'month', 'day']);
     }
     else if (period === 'lastmonth') {
-      setStartDate(dayjs().subtract(1, 'months').startOf('day'));
+      setStartDate(dayjs().subtract(1, 'months').startOf('day').add(1, 'day'));
+      setDateview(['year', 'month']);
     }
     else if (period === 'month') {
       setStartDate(dayjs().startOf('month').startOf('day'));
-      setDateview(['year', 'month']);
+      setDateview(['month', 'year']);
     }
     else if (period === 'year') {
       setStartDate(dayjs().startOf('year').startOf('day'));
@@ -123,7 +109,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       }
     }
   }, 
-  [period, dataset]);
+  [period]);
 
   // Recalc total
   useEffect(() => {
@@ -180,57 +166,41 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
 
   // Transform sessionData to required graph dataset
   useEffect(() => {
-    if (!sessionAugmented)
+    if (!sessionAugmented || startDate == null) 
       return;
 
     // Basic algorithm is to first create a number of time interval "buckets" based on the period setting.
     // Then next step is to distribute the charging entry wh values into those buckets (assuming of course
     // that the session is inside the desired overall period at all).
 
-    // Common date stuff - will be adjusted below
-    let start_date = new Date(); 
-    let end_date = new Date();
-    let midnight = new Date();
-    midnight.setHours(0, 0, 0, 0);
-    midnight = tomorrow(midnight);
-
     // Prepare the array ("buckets") ..
     const result: Array<DATAENTRY> = [];
 
     // Daily itervals
     if (period == 'month' || period == 'lastmonth') {
-      // First, quite a bit of work to get to midnight one months ago
-      start_date = new Date(midnight);
-      const month = start_date.getMonth();
-      start_date.setMonth(start_date.getMonth() - 1);
-      while (start_date.getMonth() === month)
-        start_date.setDate(start_date.getDate() - 1);
-      start_date = tomorrow(start_date);
-
-      let next_date = null;    
-      for (let date = start_date; date <= midnight; date = next_date) {
-        next_date = tomorrow(date);
-        result.push({id: format_date(date), x: date.getDate().toString(), energy: 0, timestamp: date});
+      let end_date = startDate.add(1, 'month');
+      for (let date = startDate; date <= end_date; date = date.add(1, 'day')) {
+        result.push({id: date.format('YYYY-MM-DD'), x: date.format('DD'), energy: 0, timestamp: date.toDate()});
       }
-    } else if (period == "week") {
-      start_date = new Date(midnight.getTime() - 24 * 7 * 60 * 60 * 1000);
-      let next_date = null;    
-      for (let date = start_date; date <= midnight; date = next_date) {
-        next_date = tomorrow(date);
-        result.push({id: format_date(date), x: date.getDate().toString(), energy: 0, timestamp: date});
+    } else if (period == "48hours" || period == "last48hours") {
+      let end_date = startDate.add(48, 'hours');
+      for (let date = startDate; date <= end_date; date = date.add(1, 'hour')) {
+        result.push({id: date.format('YYYY-MM-DD-HH'), x: date.format('DD') + '\n' + date.format('HH'), energy: 0, timestamp: date.toDate()});
       } 
-    } else if (period == "48hours") {
-      let now = new Date();
-      now.setMinutes(0, 0, 0);
-      now = new Date(now.getTime() + 60 * 60 * 1000);
-      start_date = new Date(now.getTime() - 48 * 60 * 60 * 1000);
-      for (let date = start_date; date <= now; date = new Date(date.getTime() + 60 * 60 * 1000)) {
-        result.push({id: format_date(date) + "-" + date.getHours().toString(), x: format_hour_interval(date), energy: 0, timestamp: date});
+    } else if (period == "year") {
+      let end_date = startDate.add(1, 'year');
+      for (let date = startDate; date <= end_date; date = date.add(1, 'month')) {
+        result.push({id: date.format('YYYY-MM'), x: date.format('MMM'), energy: 0, timestamp: date.toDate()});
+      } 
+    } else if (period == "overall") {
+      let end_date = dayjs().add(1, 'year').startOf('year');
+      for (let date = startDate; date <= end_date; date = date.add(1, 'year')) {
+        result.push({id: date.format('YYYY'), x: date.format('YYYY'), energy: 0, timestamp: date.toDate()});
       } 
     }
 
     // Then add energy from sessions. 
-    const start_date_sec = start_date.getTime() / 1000.0;
+    const start_date_sec = startDate.toDate().getTime() / 1000.0;
     for (let i = 0; i < sessionData.length; i++) {
       if (group != "(all)" && group != sessionData[i].group_id)
         continue;
@@ -271,9 +241,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         }
       }
     }
+    // The last bucket is not filled. Let's remove it
+    if (result.length > 0 && result[result.length - 1].energy == 0 && (period == 'last48hours' || period == 'lastmonth' || period == 'overall')) 
+      result.pop();
+
     setDataset(result);
   }, 
-  [period, group, sessionData, sessionAugmented]);
+  [period, group, sessionData, sessionAugmented, startDate]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -303,6 +277,10 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           label="Start"
           sx={{fontSize: '.9rem'}}
           value={startDate}
+          onChange={(newValue) => {
+            if (newValue !== null) 
+              setStartDate(newValue);
+          }}      
         />
       </FormControl>
       <FormControl sx={{m: 1, minWidth: 100}}>
