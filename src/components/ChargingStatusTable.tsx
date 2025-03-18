@@ -142,14 +142,6 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
   [connectorData]);
 
   const columns: GridColDef<(typeof connectorData)[number]>[] = [
-    { field: 'network_connected', headerName: '',
-      renderCell: (params) => {
-        if (params.row.network_connected)
-          return (<CableIcon color="success" />);
-        else
-          return (<CableIcon color="warning" />);
-      }, flex: 0.3,
-    },
     { field: 'id', headerName: 'ID', flex: 3},
     { field: 'alias', headerName: 'Alias', flex: 1.4},
     { field: 'status', headerName: 'Status', flex: 2.2, valueGetter: (value) => { return value == 'None'? 'Unknown': value}},
@@ -195,6 +187,14 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
           return (<></>);
        }, flex: .3,
     },
+    { field: 'network_connected', headerName: '',
+      renderCell: (params) => {
+        if (params.row.network_connected)
+          return (<CableIcon color="success" />);
+        else
+          return (<CableIcon color="warning" />);
+      }, flex: .3,
+    }
   ];
 
   const processRowUpdate = useCallback(
