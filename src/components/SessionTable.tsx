@@ -57,7 +57,12 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
     { field: 'end_time', headerName: 'End Time', flex: 2, valueGetter: (value) => format_time(value)},
     { field: 'energy_meter', headerName: 'Energy (kWh)', flex: 1, type: 'number', valueGetter: (value) => {return (value/1000).toFixed(3)}},
     { field: 'reason', headerName: 'Reason', flex: 2},
-    { field: 'history', headerName: '', disableExport: true,
+    { field: 'history', 
+      headerName: 'Hist',
+      description: 'Charging History',
+      disableColumnMenu: true,
+      hideSortIcons: true,
+      disableExport: true,
       renderCell: (params) => {
         const history_data = get_history_data(params.row.charging_history);
         if (history_data.length == 0)

@@ -73,7 +73,12 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
         return Object.keys(charger["connectors"]).length;
       }
     },
-    { field: 'remotestop', headerName: '',
+    { field: 'reset', 
+      headerName: 'Reset',
+      description: 'Reset Charger',
+      disableColumnMenu: true,
+      hideSortIcons: true,
+      disableExport: true,
       renderCell: (params) => {
         if (userType == 'Admin')
           return (
@@ -86,7 +91,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
           );
         else 
           return (<></>);
-      }, flex: .3
+      }, flex: .7
     }
   ];
 

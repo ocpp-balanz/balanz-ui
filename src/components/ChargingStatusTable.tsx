@@ -159,7 +159,11 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
     },
     { field: 'offered', headerName: 'Offer (A)', flex: 1.5, type: 'number' },
     { field: 'energy_meter', headerName: 'Energy (kWh)', flex: 2, type: 'number', valueGetter: (value) => {return (value/1000).toFixed(3)}},
-    { field: 'history', headerName: '',
+    { field: 'history', 
+      headerName: 'Hist',
+      description: 'Charging History',
+      disableColumnMenu: true,
+      hideSortIcons: true,
       renderCell: (params) => {
         const history_data = get_history_data(params.row.id);
         if (history_data.length == 0)
@@ -170,7 +174,11 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
             history={history_data} />);
       }, flex: .3,
     },
-    { field: 'remotestop', headerName: '',
+    { field: 'remotestop', 
+      headerName: 'Stop',
+      description: 'Remotely Stop Charging',
+      disableColumnMenu: true,
+      hideSortIcons: true,
       renderCell: (params) => {
         if (userType == 'Admin' && ['Charging', 'SuspendedEV', 'SuspendedEVSE'].includes(params.row.status) && params.row.id_tag != null)
           return (
@@ -187,7 +195,11 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
           return (<></>);
        }, flex: .3,
     },
-    { field: 'network_connected', headerName: '',
+    { field: 'network_connected', 
+      headerName: 'Conn',
+      description: 'Network Connection Status',
+      disableColumnMenu: true,
+      hideSortIcons: true,
       renderCell: (params) => {
         if (params.row.network_connected)
           return (<CableIcon color="success" />);
