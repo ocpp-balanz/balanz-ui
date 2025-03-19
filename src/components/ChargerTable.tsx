@@ -8,8 +8,8 @@ import Box from '@mui/material/Box';
 import Snackbar from '@mui/material/Snackbar';
 import ResetCharger from './ResetCharger';
 import Button from '@mui/material/Button';
-import DeleteIcon from '@mui/icons-material/Delete';
-
+import DeleteCharger from './DeleteCharger';
+import { Delete } from '@mui/icons-material';
 
 interface ChargerTableProps {
   api: BalanzAPI;
@@ -138,15 +138,14 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
           return (<></>);
       }, flex: .7
     },
-        { field: 'delete', headerName: '', flex: 1,
-            renderCell: (params) => {
-              if (params.row.charger_id == BLANKCHARGER.id_tag)
-                return <div></div>
-              else
-                return <Button onClick={() => {delete_charger(params.row.charger_id)}}><DeleteIcon color="error"/></Button>
-            },
-         },      
-    
+    { field: 'delete', headerName: '', flex: 1,
+        renderCell: (params) => {
+          if (params.row.charger_id == BLANKCHARGER.charger_id)
+            return <div></div>
+          else
+            return <DeleteCharger api={api} charger_id={params.row.charger_id} charger_alias={params.row.alias} snack={snack}/>;
+        }
+    },
   ];
 
   function getRowId(charger: GridRowModel): GridRowId {
