@@ -202,9 +202,9 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
       hideSortIcons: true,
       renderCell: (params) => {
         if (params.row.network_connected)
-          return (<CableIcon color="success" />);
+          return (<CableIcon sx={{mt: .5}} color="success" />);
         else
-          return (<CableIcon color="warning" />);
+          return (<CableIcon sx={{mt: .5}} color="warning" />);
       }, flex: .3,
     }
   ];

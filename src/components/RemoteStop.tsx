@@ -39,7 +39,7 @@ const RemoteStop: React.FC<RemoteStopProp> = ({api, charger_id, charger_alias, c
   }
 
   return (<>
-    <StopCircleIcon onClick={handleClickOpen}></StopCircleIcon>
+    <StopCircleIcon sx={{mt:.5}} onClick={handleClickOpen}></StopCircleIcon>
     <Dialog open={open}  onClose={handleClose}>
         <DialogTitle>Confirm Stop Charging</DialogTitle>
         <DialogContent>

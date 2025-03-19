@@ -20,7 +20,7 @@ export default function ChargingHistory(props: ChargingHistoryProp) {
   };
 
   return (<>
-    <QueryStatsIcon onClick={openClose}></QueryStatsIcon>
+    <QueryStatsIcon sx={{mt:.5}} onClick={openClose}></QueryStatsIcon>
     <Dialog open={open} onClick={openClose} maxWidth={false}>
         <DialogTitle>{headline}</DialogTitle>
         <LineChart
