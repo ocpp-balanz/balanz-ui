@@ -15,6 +15,7 @@ export type CHARGER = {
   alias: string;
   description: string;
   group_id: string;
+  priority: number;
   connectors: Map<string, CONNECTOR>;
   network_connected: boolean;
   charge_box_serial_number: string;

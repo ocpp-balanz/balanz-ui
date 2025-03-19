@@ -7,10 +7,28 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Snackbar from '@mui/material/Snackbar';
 import ResetCharger from './ResetCharger';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 
 interface ChargerTableProps {
   api: BalanzAPI;
   userType: string;
+};
+
+const BLANKCHARGER: CHARGER = { 
+  charger_id: '(new charger)',
+  alias: '(new alias)',
+  group_id: '(new group)',
+  description: '(new description)',
+  priority: 3,
+  connectors: new Map(),
+  network_connected: false,
+  charge_box_serial_number: '',
+  charge_point_model: '',
+  charge_point_vendor: '',
+  conn_max: 16,
+  firmware_version: ''
 };
 
 const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
@@ -25,9 +43,20 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
 
   const handleClose = () => {setOpen(false)};
 
+  async function delete_charger(charger_id: string) {
+    const [ok,] = await api.call("DeleteCharger", {"charger_id": charger_id});
+    if (ok == 3) {
+      setChargerData(chargerData.filter((charger) => charger.charger_id != charger_id));
+      snack("Succesfully deleted charger");
+    } else {
+      snack("Error deleting charger");
+    }
+  }
+
   const processRowUpdate = React.useCallback(
     async (updatedRow: GridRowModel, originalRow: GridRowModel) => {
       const payload = {"charger_id": updatedRow.charger_id}
+
       for (const [key, value] of Object.entries(updatedRow)) {
           if (value != originalRow[key]) {
           // @ts-expect-error Much easier this way
@@ -35,14 +64,30 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
         }
       }
 
-      const [ok,] = await api.call("UpdateCharger", payload);
-      if (ok == 3) {
-        snack("Succesfully updated charger");
-        return updatedRow;
-      } else {
-        console.log("Error updating charger");
-        snack("Error updating group");
+      if (updatedRow["id_tag"] == BLANKCHARGER.charger_id) {
+        snack("New Charger ID must be set first")
         return originalRow;
+      }
+
+      if (originalRow["charger_id"] == BLANKCHARGER.charger_id) {
+        const [ok,] = await api.call("CreateCharger", payload);
+        if (ok == 3) {
+          snack("Succesfully created charger");
+          return updatedRow;
+        } else {
+          snack("Error creating charger");
+          return originalRow;
+        }
+      } else {
+        const [ok,] = await api.call("UpdateCharger", payload);
+        if (ok == 3) {
+          snack("Succesfully updated charger");
+          return updatedRow;
+        } else {
+          console.log("Error updating charger");
+          snack("Error updating group");
+          return originalRow;
+        }
       }
     }, [api]
   );
@@ -52,7 +97,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
     const getChargers = async() => {
       const [ok, payload] = await api.call("GetChargers", {});
       if (ok == 3) {
-        setChargerData(payload);
+        setChargerData([BLANKCHARGER, ... payload]);
       } else {
         console.log("Error getting chargers");
       }
@@ -62,9 +107,9 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
   [api]);
 
   const columns: GridColDef<(typeof chargerData)[number]>[] = [
-    { field: 'charger_id', headerName: 'ID', flex: 3 },
-    { field: 'alias', headerName: 'Alias', flex: 2 },
-    { field: 'group_id', headerName: 'Group', flex: 2},
+    { field: 'charger_id', headerName: 'ID', flex: 3, editable: true },
+    { field: 'alias', headerName: 'Alias', flex: 2, editable: true },
+    { field: 'group_id', headerName: 'Group', flex: 2, editable: true },
     { field: 'description', headerName: 'Description', flex: 4, editable: true},
     { field: 'priority', headerName: 'Priority', type: 'number', flex: 1, editable: true},
     { field: 'conn_max', headerName: 'Max A', type: 'number', flex: 1, editable: true},
@@ -92,7 +137,16 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
         else 
           return (<></>);
       }, flex: .7
-    }
+    },
+        { field: 'delete', headerName: '', flex: 1,
+            renderCell: (params) => {
+              if (params.row.charger_id == BLANKCHARGER.id_tag)
+                return <div></div>
+              else
+                return <Button onClick={() => {delete_charger(params.row.charger_id)}}><DeleteIcon color="error"/></Button>
+            },
+         },      
+    
   ];
 
   function getRowId(charger: GridRowModel): GridRowId {
@@ -112,6 +166,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
     <Stack>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <DataGrid
+          editMode="row"
           getRowId={getRowId}
           rows={chargerData}
           density="compact"
@@ -120,6 +175,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
           columns={columns}
           sx={{fontSize: '.8rem'}}
           processRowUpdate={processRowUpdate}
+          isCellEditable={(params: GridRowModel) => (params.field != 'charger_id' && params.field != 'delete') || (params.field == 'charger_id' && params.value == BLANKCHARGER.charger_id) }
         />
       </div>
         <Snackbar
