@@ -7,6 +7,8 @@ charging status screens, as well as access to historic sessions.
 
 While the UI is primarily intended for a normal-size browser screen, it is possible to access most screen also from a smaller device (e.g. a mobile phone).
 
+A brief guide for the UI is contained within the general balanz documentation, head to [rtd](http://balanz.rtfd.io/).
+
 
 ## Installation
 
