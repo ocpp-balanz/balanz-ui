@@ -5,7 +5,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import StopCircleIcon from '@mui/icons-material/StopCircle';
 import BalanzAPI from '../services/balanz_api';
 import DeleteIcon from '@mui/icons-material/Delete';
 

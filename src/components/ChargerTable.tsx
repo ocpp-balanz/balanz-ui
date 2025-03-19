@@ -7,9 +7,7 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Snackbar from '@mui/material/Snackbar';
 import ResetCharger from './ResetCharger';
-import Button from '@mui/material/Button';
 import DeleteCharger from './DeleteCharger';
-import { Delete } from '@mui/icons-material';
 
 interface ChargerTableProps {
   api: BalanzAPI;
@@ -42,16 +40,6 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
   };
 
   const handleClose = () => {setOpen(false)};
-
-  async function delete_charger(charger_id: string) {
-    const [ok,] = await api.call("DeleteCharger", {"charger_id": charger_id});
-    if (ok == 3) {
-      setChargerData(chargerData.filter((charger) => charger.charger_id != charger_id));
-      snack("Succesfully deleted charger");
-    } else {
-      snack("Error deleting charger");
-    }
-  }
 
   const processRowUpdate = React.useCallback(
     async (updatedRow: GridRowModel, originalRow: GridRowModel) => {
