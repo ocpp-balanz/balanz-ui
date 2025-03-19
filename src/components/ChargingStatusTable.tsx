@@ -237,81 +237,83 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
       <Accordion key={group.group_id} slotProps={{ transition: { timeout: 0 }}}>
       <AccordionSummary
         expandIcon={<ArrowDropDownIcon />}
-        sx={{fontSize: '.9rem', mt: 2}}
+        sx={{fontSize: '.9rem', mt: 0}}
       >
-          <Stack alignItems="center" sx={{ width: '100%' }} direction="row" gap={1} divider={<Divider orientation="vertical" />}>
-            <Stack alignItems="left" gap={0}>
-              {group.group_id}
-              <Gauge width={70} height={70} value={group.offered} valueMin={0} valueMax={get_max_allocation(group.max_allocation_now)} startAngle={-90} endAngle={90}
-                margin={{
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                }}
-                text={
-                  ({ value, valueMax }) => `${value}/${valueMax} A`
-              }
+        <Stack>
+          {group.group_id}
+            <Stack alignItems="center" sx={{ width: '100%' }} direction="row" gap={1} divider={<Divider orientation="vertical" />}>
+              <Stack alignItems="left" gap={0}>
+                <Gauge width={70} height={70} value={group.offered} valueMin={0} valueMax={get_max_allocation(group.max_allocation_now)} startAngle={-90} endAngle={90}
+                  margin={{
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                  }}
+                  text={
+                    ({ value, valueMax }) => `${value}/${valueMax} A`
+                }
                 /> 
-            </Stack>
-            {/* 
-            <Stack direction="row" alignItems="center" gap={1} >
-              <EvStation color="info" sx={{ scale: '1'}}/> {chargerData.length}
-            </Stack> 
-            */}
-            <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
-              <Stack>
-                <Stack direction="row" alignItems="center" gap={1} useFlexGap>
-                  <ElectricalServicesIcon color='info' sx={{ scale: '1' }}/> {connectorData.length} 
-                </Stack>
-                Total
               </Stack>
-            </Stack>
-            <Stack>
-              <Stack direction="row" alignItems="center" gap={1}>
-                <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Available") ?? 0} 
-              </Stack> 
-              Available
-            </Stack>
-            <Stack>
+              {/* 
               <Stack direction="row" alignItems="center" gap={1} >
-                <ElectricalServicesIcon color='warning' sx={{ scale: '1' }}/> {connectorStates.get("Charging") ?? 0}
+                <EvStation color="info" sx={{ scale: '1'}}/> {chargerData.length}
               </Stack> 
-              Charging
-            </Stack>
-            <Stack>
-              <Stack direction="row" alignItems="center" gap={1} >
-                <ElectricalServicesIcon color='primary' sx={{ scale: '1' }}/> {connectorStates.get("SuspendedEV") ?? 0} 
-              </Stack> 
-              SuspendedEV
-            </Stack>
-            <Stack>
-              <Stack direction="row" alignItems="center" gap={1} >
-                <ElectricalServicesIcon color='secondary' sx={{ scale: '1' }}/> {connectorStates.get("SuspendedEVSE") ?? 0}
-              </Stack> 
-              SuspendedEVSE
-            </Stack>
-            <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
-              <Stack direction="row" alignItems="center" gap={1} >
-                <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Preparing") ?? 0} 
-              </Stack> 
-              Preparing 
-            </Stack>
-            <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
-              <Stack direction="row" alignItems="center" gap={1} >
-                <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Finishing") ?? 0} 
-              </Stack> 
-              Finishing
-            </Stack>
-            <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
-              <Stack direction="row" alignItems="center" gap={1} >
-                <ElectricalServicesIcon color='error' sx={{ scale: '1' }}/> {connectorStates.get("None") ?? 0} 
-              </Stack> 
-              Unknown
+              */}
+              <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+                <Stack>
+                  <Stack direction="row" alignItems="center" gap={1} useFlexGap>
+                    <ElectricalServicesIcon color='info' sx={{ scale: '1' }}/> {connectorData.length} 
+                  </Stack>
+                  Total
+                </Stack>
+              </Stack>
+              <Stack>
+                <Stack direction="row" alignItems="center" gap={1}>
+                  <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Available") ?? 0} 
+                </Stack> 
+                Available
+              </Stack>
+              <Stack>
+                <Stack direction="row" alignItems="center" gap={1} >
+                  <ElectricalServicesIcon color='warning' sx={{ scale: '1' }}/> {connectorStates.get("Charging") ?? 0}
+                </Stack> 
+                Charging
+              </Stack>
+              <Stack>
+                <Stack direction="row" alignItems="center" gap={1} >
+                  <ElectricalServicesIcon color='primary' sx={{ scale: '1' }}/> {connectorStates.get("SuspendedEV") ?? 0} 
+                </Stack> 
+                SuspendedEV
+              </Stack>
+              <Stack>
+                <Stack direction="row" alignItems="center" gap={1} >
+                  <ElectricalServicesIcon color='secondary' sx={{ scale: '1' }}/> {connectorStates.get("SuspendedEVSE") ?? 0}
+                </Stack> 
+                SuspendedEVSE
+              </Stack>
+              <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+                <Stack direction="row" alignItems="center" gap={1} >
+                  <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Preparing") ?? 0} 
+                </Stack> 
+                Preparing 
+              </Stack>
+              <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+                <Stack direction="row" alignItems="center" gap={1} >
+                  <ElectricalServicesIcon color='success' sx={{ scale: '1' }}/> {connectorStates.get("Finishing") ?? 0} 
+                </Stack> 
+                Finishing
+              </Stack>
+              <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
+                <Stack direction="row" alignItems="center" gap={1} >
+                  <ElectricalServicesIcon color='error' sx={{ scale: '1' }}/> {connectorStates.get("None") ?? 0} 
+                </Stack> 
+                Unknown
+              </Stack>
             </Stack>
           </Stack>
       </AccordionSummary>
-      <AccordionDetails sx={{mx: 0, px: 0, width: '100%'}}>
+      <AccordionDetails sx={{m: 0, px: 0, py: 1, width: '100%'}}>
         <DataGrid 
           hideFooterPagination={true}
           hideFooter={true}

@@ -42,7 +42,7 @@ const Status: React.FC<StatusProp> = ({ api, userType }) => {
   return groupData.length == 0 ? ( 
       <Loader />
   ) : (
-    <Container maxWidth={false} sx={{ mt: 2 }}>
+    <Container maxWidth={false} sx={{ mt: 0 }}>
       {groupData.map((group) => (
         <ChargingStatusTable api={api} key={group.group_id} group={group} chargerData={group.chargers} userType={userType} />
       ))}
