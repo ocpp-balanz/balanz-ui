@@ -299,7 +299,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         const start = sessionData[i].hourly_history[ci].timestamp;
         const end = sessionData[i].hourly_history[ci + 1].timestamp;
 
-        let found_bucket: boolean = false;
         for (let bucket_index = 0; bucket_index < result.length - 1; bucket_index++) {
           const bstart = result[bucket_index].timestamp;
           const bend = result[bucket_index + 1].timestamp;
@@ -307,7 +306,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           if (start >= bstart && end <= bend) {
             // Here!
             result[bucket_index].energy += ((sessionData[i].hourly_history[ci].wh??0) / 1000.0);
-            found_bucket = true;
             break;
           }
         }
