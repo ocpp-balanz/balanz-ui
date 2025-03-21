@@ -179,7 +179,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       const hour_entries: Array<CHARGING_ENTRY> = [];
       const start_date = dayjs.unix(sessionData[i].start_time).startOf("hour");
       let end_date = sessionData[i].end_time == null? dayjs(): dayjs.unix(sessionData[i].end_time);
-      end_date = end_date.add(2, 'hour').startOf("hour");   // Ensure final entry extends.
+      end_date = end_date.add(1, 'hour').startOf("hour");   // Ensure final entry extends.
       for (let date = start_date; date <= end_date; date = date.add(1, 'hour'))
         hour_entries.push({timestamp: date.unix(), offered: null, usage: null, date: date.toDate(), wh: 0});
 
