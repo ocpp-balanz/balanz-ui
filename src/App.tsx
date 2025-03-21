@@ -24,6 +24,7 @@ const App: React.FC<AppProp> = ({ api }) => {
   const [token, setToken] = useState<string>("");
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [userType, setUserType] = useState<string>("");
+  const [doingLogin, setDoingLogin] = useState<boolean>(false);
 
   const { pathname } = useLocation();
 
@@ -38,12 +39,14 @@ const App: React.FC<AppProp> = ({ api }) => {
   useMemo(() => {
     const doLogin = async() => {
       if (token != "" && api) {
+        setDoingLogin(true);
         const user_type = await api.login(token);
         if (user_type != "") {
           setUserType(user_type);
           setLoggedIn(true);
           console.log("Logged in as", user_type);
         }  
+        setDoingLogin(false);
       }
     }
     doLogin();
@@ -55,7 +58,7 @@ const App: React.FC<AppProp> = ({ api }) => {
 
   if (!loggedIn)
     return (
-      <Login setToken={setToken} showLoginFailure={token != "" && !loggedIn}/> 
+      <Login setToken={setToken} showLoginFailure={token != "" && !loggedIn && !doingLogin}/> 
     );
 
   if (userType == "Status" || userType == "SessionPriority") {
