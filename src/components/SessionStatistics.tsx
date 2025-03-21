@@ -137,7 +137,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       });
 
       // Some entries in sessions may be errored, having end_time ahead of start_time.
-      // Hack it.
+      // Hack it dramatically.
       if (sessionData[i].end_time != null && sessionData[i].end_time <= sessionData[i].start_time) {
         sessionData[i].end_time = sessionData[i].start_time + 1800;  // 30 min
         console.log("WARNING: Session " + i + ": end time is before start time. Setting to " + sessionData[i].end_time, "usage is", sessionData[i].kwh);
@@ -179,7 +179,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       const hour_entries: Array<CHARGING_ENTRY> = [];
       const start_date = dayjs.unix(sessionData[i].start_time).startOf("hour");
       let end_date = sessionData[i].end_time == null? dayjs(): dayjs.unix(sessionData[i].end_time);
-      end_date = end_date.add(1, 'hour').startOf("hour");   // Ensure final entry extends.
+      end_date = end_date.add(2, 'hour').startOf("hour");   // Ensure final entry extends.
       for (let date = start_date; date <= end_date; date = date.add(1, 'hour'))
         hour_entries.push({timestamp: date.unix(), offered: null, usage: null, date: date.toDate(), wh: 0});
 
@@ -221,6 +221,16 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           console.log("Warning, remaining for session", sessionData[i].session_id, remain);
       } 
 
+      // First, let's review the totals to make sure they add up. If not, adjust them into first entry.
+      let total_check = 0;
+      for (let hour_index = 0; hour_index < hour_entries.length; hour_index++) 
+        total_check += hour_entries[hour_index].wh??0;
+      if (Math.abs(total_check - sessionData[i].energy_meter) > 1) {
+        console.log("Adjusting data for session", sessionData[i].session_id, "missed to distribute energy", sessionData[i].energy_meter);
+        const diff = sessionData[i].energy_meter - total_check;
+        hour_entries[0].wh = (hour_entries[0].wh??0) + diff;
+      } 
+
       // Now, let's add all - non-zero - entries to the session object. 
       // NOTE. The final entry will always be added to ensure a final entry
       sessionData[i].hourly_history = [];
@@ -229,9 +239,10 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           sessionData[i].hourly_history.push(hour_entries[hour_index]);
         }
       }
+
     }
     setSessionAugmented(true);
-  }, 
+  },
   [sessionData, sessionAugmented]);
 
   // Transform sessionData to required graph dataset
