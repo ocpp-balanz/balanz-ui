@@ -231,15 +231,11 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         hour_entries[0].wh = (hour_entries[0].wh??0) + diff;
       } 
 
-      // Now, let's add all - non-zero - entries to the session object. 
-      // NOTE. The final entry will always be added to ensure a final entry
+      // Now, let's add all entries to the session object. 
       sessionData[i].hourly_history = [];
       for (let hour_index = 0; hour_index < hour_entries.length; hour_index++) {
-        if ((hour_index == hour_entries.length - 1) || (hour_entries[hour_index].wh??0 > 0)) {
-          sessionData[i].hourly_history.push(hour_entries[hour_index]);
-        }
+        sessionData[i].hourly_history.push(hour_entries[hour_index]);
       }
-
     }
     setSessionAugmented(true);
   },
@@ -276,7 +272,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         result.push({id: date.format('YYYY-MM'), x: date.format('MMM'), energy: 0, timestamp: date.unix()});
       } 
     } else if (period == "overall") {
-      end_date = dayjs().add(1, 'year').startOf('year');
+      end_date = dayjs().add(1, 'year').startOf('year').startOf('day');
       for (let date = startDate; date <= end_date; date = date.add(1, 'year')) {
         result.push({id: date.format('YYYY'), x: date.format('YYYY'), energy: 0, timestamp: date.unix()});
       } 
@@ -303,13 +299,15 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         const start = sessionData[i].hourly_history[ci].timestamp;
         const end = sessionData[i].hourly_history[ci + 1].timestamp;
 
+        let found_bucket: boolean = false;
         for (let bucket_index = 0; bucket_index < result.length - 1; bucket_index++) {
           const bstart = result[bucket_index].timestamp;
           const bend = result[bucket_index + 1].timestamp;
 
           if (start >= bstart && end <= bend) {
-            // Here
+            // Here!
             result[bucket_index].energy += ((sessionData[i].hourly_history[ci].wh??0) / 1000.0);
+            found_bucket = true;
             break;
           }
         }
