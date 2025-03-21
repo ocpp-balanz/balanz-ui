@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { SESSION, GROUP, CHARGER } from '../types/types';
+import { SESSION, GROUP, CHARGER, CHARGING_ENTRY } from '../types/types';
 import { BarChart } from '@mui/x-charts/BarChart';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -24,7 +24,7 @@ interface SessionStatisticsProps {
 
 type DATAENTRY = {
   id: string;
-  timestamp: Date;
+  timestamp: number;
   x: string;
   energy: number;
 };
@@ -110,8 +110,8 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       setDateview(['year']);
     }
     else if (period === 'overall') {
-      if (dataset.length > 0) {
-        setStartDate(dayjs(dataset[0].timestamp).startOf('year').startOf('day'));
+      if (sessionData.length > 0) {
+        setStartDate(dayjs.unix(sessionData[0].start_time).startOf('year').startOf('day'));
         setDateview(['year']);
       }
     }
@@ -135,6 +135,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       sessionData[i].charging_history.map((e) => {
         e.date = new Date(e.timestamp * 1000);
       });
+
+      // Some entries in sessions may be errored, having end_time ahead of start_time.
+      // Hack it.
+      if (sessionData[i].end_time != null && sessionData[i].end_time <= sessionData[i].start_time) {
+        sessionData[i].end_time = sessionData[i].start_time + 1800;  // 30 min
+        console.log("WARNING: Session " + i + ": end time is before start time. Setting to " + sessionData[i].end_time, "usage is", sessionData[i].kwh);
+      }
   
       // Next, let's review the entries in more details to determine wh...
       let usage = null;
@@ -165,6 +172,62 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         const factor = sessionData[i].energy_meter / total_wh;
         for (let ci = 0; ci < sessionData[i].charging_history.length - 1; ci++)
           sessionData[i].charging_history[ci].wh = (sessionData[i].charging_history[ci].wh??0) * factor;
+      } 
+
+      // Ok, that was fun. Do instead hourly entries and distribute across these. This will be much
+      // more usefull later on.
+      const hour_entries: Array<CHARGING_ENTRY> = [];
+      const start_date = dayjs.unix(sessionData[i].start_time).startOf("hour");
+      let end_date = sessionData[i].end_time == null? dayjs(): dayjs.unix(sessionData[i].end_time);
+      end_date = end_date.add(1, 'hour').startOf("hour");   // Ensure final entry extends.
+      for (let date = start_date; date <= end_date; date = date.add(1, 'hour'))
+        hour_entries.push({timestamp: date.unix(), offered: null, usage: null, date: date.toDate(), wh: 0});
+
+      // Iterate charging entries and put into the right hour_entry
+      for (let ci = 0; ci < sessionData[i].charging_history.length; ci++) {
+        const start = sessionData[i].charging_history[ci].timestamp;
+        let end = null;
+        if (ci == sessionData[i].charging_history.length - 1) {
+          if (sessionData[i].end_time != null)
+            end = sessionData[i].end_time;
+          else
+            end = dayjs().unix();
+        } else {
+          end = sessionData[i].charging_history[ci + 1].timestamp;
+        }
+        if (start == end)
+          continue;   // Same second admin type entry - skip it.
+
+        let remain = sessionData[i].charging_history[ci].wh??0;
+        for (let hour_index = 0; hour_index < hour_entries.length - 1; hour_index++) {
+          const bstart = hour_entries[hour_index].timestamp;
+          const bend = hour_entries[hour_index + 1].timestamp;
+
+          // How much overlap
+          const overlap_s = Math.min(end, bend) - Math.max(start, bstart);
+          if (overlap_s <= 0)
+            continue;
+
+          // Vs. length? - this determines the relative contribution
+          const contrib_wh = (sessionData[i].charging_history[ci].wh??0) * (overlap_s / (end - start));
+          if (hour_entries[hour_index].wh == null)
+            hour_entries[hour_index].wh = contrib_wh;
+          else
+            // @ts-expect-error
+            hour_entries[hour_index].wh += contrib_wh; 
+          remain -= contrib_wh;
+        }
+        if (remain > 1)
+          console.log("Warning, remaining for session", sessionData[i].session_id, remain);
+      } 
+
+      // Now, let's add all - non-zero - entries to the session object. 
+      // NOTE. The final entry will always be added to ensure a final entry
+      sessionData[i].hourly_history = [];
+      for (let hour_index = 0; hour_index < hour_entries.length; hour_index++) {
+        if ((hour_index == hour_entries.length - 1) || (hour_entries[hour_index].wh??0 > 0)) {
+          sessionData[i].hourly_history.push(hour_entries[hour_index]);
+        }
       }
     }
     setSessionAugmented(true);
@@ -189,22 +252,22 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     if (period == 'month' || period == 'lastmonth') {
       end_date = startDate.add(1, 'month');
       for (let date = startDate; date <= end_date; date = date.add(1, 'day')) {
-        result.push({id: date.format('YYYY-MM-DD'), x: date.format('DD'), energy: 0, timestamp: date.toDate()});
+        result.push({id: date.format('YYYY-MM-DD'), x: date.format('DD'), energy: 0, timestamp: date.unix()});
       }
     } else if (period == "48hours" || period == "last48hours") {
       end_date = startDate.add(48, 'hours');
       for (let date = startDate; date <= end_date; date = date.add(1, 'hour')) {
-        result.push({id: date.format('YYYY-MM-DD-HH'), x: date.format('DD') + '\n' + date.format('HH'), energy: 0, timestamp: date.toDate()});
+        result.push({id: date.format('YYYY-MM-DD-HH'), x: date.format('DD') + '\n' + date.format('HH'), energy: 0, timestamp: date.unix()});
       } 
     } else if (period == "year") {
       end_date = startDate.add(1, 'year');
       for (let date = startDate; date <= end_date; date = date.add(1, 'month')) {
-        result.push({id: date.format('YYYY-MM'), x: date.format('MMM'), energy: 0, timestamp: date.toDate()});
+        result.push({id: date.format('YYYY-MM'), x: date.format('MMM'), energy: 0, timestamp: date.unix()});
       } 
     } else if (period == "overall") {
       end_date = dayjs().add(1, 'year').startOf('year');
       for (let date = startDate; date <= end_date; date = date.add(1, 'year')) {
-        result.push({id: date.format('YYYY'), x: date.format('YYYY'), energy: 0, timestamp: date.toDate()});
+        result.push({id: date.format('YYYY'), x: date.format('YYYY'), energy: 0, timestamp: date.unix()});
       } 
     }
 
@@ -224,35 +287,20 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       if (sessionData[i].start_time > end_date_sec)  
         continue;
 
-      // Iterate charging entries and put into the right bucket(s)
-      for (let ci = 0; ci < sessionData[i].charging_history.length; ci++) {
-        const start = sessionData[i].charging_history[ci].date??new Date();
-        let end = null;
-        if (ci == sessionData[i].charging_history.length - 1) {
-          if (sessionData[i].end_time != null)
-            end = new Date(sessionData[i].end_time * 1000);
-          else
-            end = new Date();
-        } else {
-          end = sessionData[i].charging_history[ci + 1].date??new Date();
-        }
-        if (start == end)
-          continue;   // Same second admin type entry - skip it.
+      // Iterate hourly charging entries and put into the right bucket(s)
+      for (let ci = 0; ci < sessionData[i].hourly_history.length - 1; ci++) {
+        const start = sessionData[i].hourly_history[ci].timestamp;
+        const end = sessionData[i].hourly_history[ci + 1].timestamp;
 
-        let remain = sessionData[i].charging_history[ci].wh??0;
         for (let bucket_index = 0; bucket_index < result.length - 1; bucket_index++) {
           const bstart = result[bucket_index].timestamp;
           const bend = result[bucket_index + 1].timestamp;
 
-          // How much overlap
-          const overlap_ms = Math.min(end.getTime(), bend.getTime()) - Math.max(start.getTime(), bstart.getTime());
-          if (overlap_ms <= 0)
-            continue;
-
-          // Vs. length? - this determines the relative contribution
-          const contrib_wh = (sessionData[i].charging_history[ci].wh??0) * (overlap_ms / (end.getTime() - start.getTime()));
-          result[bucket_index].energy += contrib_wh / 1000.0; 
-          remain -= contrib_wh;
+          if (start >= bstart && end <= bend) {
+            // Here
+            result[bucket_index].energy += ((sessionData[i].hourly_history[ci].wh??0) / 1000.0);
+            break;
+          }
         }
       }
     }

@@ -16,7 +16,7 @@ const Statistics: React.FC<StatisticsProp> = ({ api }) => {
   
   const getSessions = (api: BalanzAPI) => {
     const getSessions = async() => {
-      const [ok, payload] = await api.call("GetSessions", {"include_live": "true"});
+      const [ok, payload] = await api.call("GetSessions", {});
       if (ok == 3) {
         console.log("Succesfully retrieved sessions, #", payload.length);
         setSessionData(payload);

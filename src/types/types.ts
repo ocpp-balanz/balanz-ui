@@ -61,6 +61,7 @@ export type SESSION = {
   reason: string;
   kwh: string;
   charging_history: Array<CHARGING_ENTRY>;
+  hourly_history: Array<CHARGING_ENTRY>;
 };
 
 export type USER = {
