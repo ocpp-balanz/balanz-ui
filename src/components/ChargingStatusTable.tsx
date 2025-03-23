@@ -56,11 +56,23 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
 
   const handleClose = () => {setOpen(false)};
 
-  function get_max_allocation(max_alloc: Array<Record<number, number>>): number {
-    let max = 0;
-    for (let i = 0; i < max_alloc.length; i++) 
-      max = Math.max(max, max_alloc[i][1]);
-    return max
+  function get_max_allocation(group: GROUP): number {
+    if (group.max_allocation != null) {
+      const max_alloc = group.max_allocation_now;
+      let max = 0;
+      for (let i = 0; i < max_alloc.length; i++) 
+        max = Math.max(max, max_alloc[i][1]);
+      return max;
+    } else {
+      return group.offered;
+    }
+  }
+
+  function offered_or_usage(group: GROUP): number {
+    if (group.max_allocation != null)
+      return group.offered;
+    else 
+      return group.usage;
   }
 
   function get_history_data(full_id: string): Array<CHARGING_ENTRY> {
@@ -243,7 +255,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
           {group.group_id}
             <Stack alignItems="center" sx={{ width: '100%' }} direction="row" gap={1} divider={<Divider orientation="vertical" />}>
               <Stack alignItems="left" gap={0}>
-                <Gauge width={70} height={70} value={group.offered} valueMin={0} valueMax={get_max_allocation(group.max_allocation_now)} startAngle={-90} endAngle={90}
+                <Gauge width={70} height={70} value={offered_or_usage(group)} valueMin={0} valueMax={get_max_allocation(group)} startAngle={-90} endAngle={90}
                   margin={{
                     left: 0,
                     right: 0,
