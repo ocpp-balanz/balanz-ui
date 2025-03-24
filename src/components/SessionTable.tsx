@@ -1,9 +1,12 @@
+import { useEffect, useState } from 'react';
 import { CHARGING_ENTRY, SESSION } from '../types/types';
 import { DataGrid, GridColDef, GridRowModel, GridRowId, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import ChargingHistory from './ChargingHistory';
 import { format_time } from '../common/utils';
 import { Button, Stack, Box } from '@mui/material';
 import BalanzAPI from '../services/balanz_api';
+import { augment_session_data} from '../common/SessionSupport';
+
 
 interface SessionTableProps {
   api: BalanzAPI;
@@ -11,12 +14,23 @@ interface SessionTableProps {
 };
 
 const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
+  const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
+  
   function get_history_data(history: Array<CHARGING_ENTRY>): Array<CHARGING_ENTRY> {
     history.map((e) => {
       e.date = new Date(e.timestamp * 1000);
     });
     return history;
   }
+
+    // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
+    // a net Wh usage value will be added.
+    useEffect(() => {
+      augment_session_data(sessionData);
+      setSessionAugmented(true);
+    },
+    [sessionData, sessionAugmented]);
+  
 
   function download_sessions() {
     const getSessionsCSV = async() => {
@@ -40,6 +54,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
     }
     getSessionsCSV();
   }
+
 
   function getRowId(session: GridRowModel): GridRowId {
     return session.session_id;
@@ -89,6 +104,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
       <Box sx={{mb: 2}} display="flex" justifyContent="flex-start">
         <Button onClick={download_sessions} variant='contained'>Download backend sessions CSV</Button>  
       </Box>
+
       <DataGrid 
         getRowId={getRowId}
         rows={sessionData}

@@ -8,6 +8,7 @@ export type CHARGING_ENTRY = {
   usage: number | null;
   date: Date | null;
   wh: number | null;
+  price: number | null;
 }
 
 export type CHARGER = {
@@ -68,4 +69,12 @@ export type USER = {
   user_id: string;
   user_type: string;
   description: string;
+};
+
+export type HOUR_PRICE = {
+  DKK_per_kWh: number;
+  EUR_per_kWh: number;
+  EXR: number;
+  time_start: Date;
+  time_end: Date;
 };
