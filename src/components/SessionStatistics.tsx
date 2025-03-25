@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { SESSION, GROUP, CHARGER } from '../types/types';
 import { BarChart } from '@mui/x-charts/BarChart';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -28,6 +27,7 @@ interface SessionStatisticsProps {
 declare module '@mui/x-data-grid' {
   interface FooterPropsOverrides {
     total: number;
+    totalPrice: number;
   }
 }
 
@@ -54,6 +54,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   const [charger, setCharger] = useState<string>('(all)');
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
   const [total, setTotal] = useState<number>(0);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
   const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
   const [dateview, setDateview] = useState<Array<String>>(['year', 'month', 'day']);
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().subtract(48, 'hours'));
@@ -74,7 +75,15 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   const columns: GridColDef<DATAENTRY>[] = [
     { field: 'id', headerName: 'Timestamp', flex: 2},
     { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value: number) => {return value.toFixed(3)}, flex: 2},
-    { field: 'price', headerName: PRICE_HEADER, type: 'number', valueGetter: (value: number) => {return value.toFixed(2)}, flex: 2}
+    { field: 'price', headerName: PRICE_HEADER, type: 'number', valueGetter: (value: number) => {return value.toFixed(2)}, flex: 2},
+    { field: 'avprice', headerName: "Average Price", type: 'number',       
+      renderCell: (params) => {
+        if (params.row.energy == 0) 
+          return (<></>);
+        else
+          return (<>{(params.row.price / params.row.energy).toFixed(2)}</>);
+      },
+      flex: 2}
   ];
   
   function CustomFooterComponent(
@@ -83,11 +92,12 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     return (
       <>
         <Divider />
-        <Stack direction="row" sx={{ mx: 1.1, my: 1}}>
-          <b>Total</b>
-          <Box sx={{ flexGrow: 1 }} />
-          <b>{props.total?.toFixed(3)}</b>
-        </Stack>
+        <Box sx={{ mx: 1.1, my: 1, display: "flex"}}>
+          <Box flex={1} alignContent="left"><b>Total</b></Box>
+          <Box flex={1} alignContent="right"><b>{props.total?.toFixed(3)}</b></Box>
+          <Box flex={1} alignContent="right"><b>{props.totalPrice?.toFixed(2)}</b></Box>
+          <Box flex={1} alignContent="right"><b>{((props.totalPrice??0) / (props.total??1)).toFixed(2)}</b></Box>
+        </Box>
       </>
     );
   }
@@ -126,9 +136,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   // Recalc total
   useEffect(() => {
     let sum = 0;
-    for (let i = 0; i < dataset.length; i++)
+    let sum_price = 0;
+    for (let i = 0; i < dataset.length; i++) {
       sum += dataset[i].energy;
+      sum_price += dataset[i].price;
+    }
     setTotal(sum);
+    setTotalPrice(sum_price);
   }, 
   [dataset]);
 
@@ -312,10 +326,10 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         rows={dataset}
         columns={columns}
         density="compact"
-        sx={{fontSize: '.8rem', width:250}}
+        sx={{fontSize: '.8rem', width:450}}
         slots={{ toolbar: CustomToolbar, footer: CustomFooterComponent }}
         slotProps={{
-          footer: { total }
+          footer: { total, totalPrice}
         }}
       />
     </Box>

@@ -107,7 +107,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
           break;
         }
     
-      history.push({timestamp: Date.now() / 1000, date: new Date(), offered: last_offered, usage: last_usage, wh: 0})
+      history.push({timestamp: Date.now() / 1000, date: new Date(), offered: last_offered, usage: last_usage, wh: 0, price: 0})
     }
     return history;
   }
