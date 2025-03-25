@@ -6,6 +6,7 @@ import { format_time } from '../common/utils';
 import { Button, Stack, Box } from '@mui/material';
 import BalanzAPI from '../services/balanz_api';
 import { augment_session_data} from '../common/SessionSupport';
+import { price_session_data} from '../common/EPricing';
 
 
 interface SessionTableProps {
@@ -27,6 +28,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
     // a net Wh usage value will be added.
     useEffect(() => {
       augment_session_data(sessionData);
+      price_session_data(sessionData);
       setSessionAugmented(true);
     },
     [sessionData, sessionAugmented]);
@@ -71,6 +73,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
     { field: 'start_time', headerName: 'Start Time', flex: 2, valueGetter: (value) => format_time(value)}, 
     { field: 'end_time', headerName: 'End Time', flex: 2, valueGetter: (value) => format_time(value)},
     { field: 'energy_meter', headerName: 'Energy (kWh)', flex: 1, type: 'number', valueGetter: (value) => {return (value/1000).toFixed(3)}},
+    { field: 'price', headerName: 'Price', flex: 1, type: 'number', valueGetter: (value) => {return value.toFixed(2)}},
     { field: 'reason', headerName: 'Reason', flex: 2},
     { field: 'history', 
       headerName: 'Hist',

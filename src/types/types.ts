@@ -63,6 +63,7 @@ export type SESSION = {
   kwh: string;
   charging_history: Array<CHARGING_ENTRY>;
   hourly_history: Array<CHARGING_ENTRY>;
+  price: number;
 };
 
 export type USER = {
@@ -78,3 +79,11 @@ export type HOUR_PRICE = {
   time_start: Date;
   time_end: Date;
 };
+
+export type DATAENTRY = {
+    id: string;
+    timestamp: number;
+    x: string;
+    energy: number;
+};
+

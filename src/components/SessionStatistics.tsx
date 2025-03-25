@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { SESSION, GROUP, CHARGER } from '../types/types';
+import { SESSION, GROUP, CHARGER, DATAENTRY } from '../types/types';
 import { BarChart } from '@mui/x-charts/BarChart';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -14,7 +14,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
-import { DATAENTRY, augment_session_data} from '../common/SessionSupport';
+import { augment_session_data} from '../common/SessionSupport';
+import { price_session_data} from '../common/EPricing';
 
 
 interface SessionStatisticsProps {
@@ -125,7 +126,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   // a net Wh usage value will be added.
   useEffect(() => {
     augment_session_data(sessionData);
-
+    price_session_data(sessionData)
     setSessionAugmented(true);
   },
   [sessionData, sessionAugmented]);
