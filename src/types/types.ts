@@ -72,10 +72,3 @@ export type USER = {
   description: string;
 };
 
-export type DATAENTRY = {
-    id: string;
-    timestamp: number;
-    x: string;
-    energy: number;
-};
-

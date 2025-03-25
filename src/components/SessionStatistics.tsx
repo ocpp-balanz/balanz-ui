@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { SESSION, GROUP, CHARGER, DATAENTRY } from '../types/types';
+import { SESSION, GROUP, CHARGER } from '../types/types';
 import { BarChart } from '@mui/x-charts/BarChart';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -15,8 +15,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { augment_session_data} from '../common/SessionSupport';
-import { price_session_data} from '../common/EPricing';
+import { price_session_data, price_currency} from '../common/EPricing';
 
+const PRICE_HEADER = 'Price (' + price_currency() + ')';
 
 interface SessionStatisticsProps {
   sessionData: Array<SESSION>;
@@ -29,6 +30,14 @@ declare module '@mui/x-data-grid' {
     total: number;
   }
 }
+
+type DATAENTRY = {
+  id: string;
+  timestamp: number;
+  x: string;
+  energy: number;
+  price: number;
+};
 
 function CustomToolbar() {
   return (
@@ -64,7 +73,8 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
 
   const columns: GridColDef<DATAENTRY>[] = [
     { field: 'id', headerName: 'Timestamp', flex: 2},
-    { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value) => {return (value/1).toFixed(3)}, flex: 2},
+    { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value: number) => {return value.toFixed(3)}, flex: 2},
+    { field: 'price', headerName: PRICE_HEADER, type: 'number', valueGetter: (value: number) => {return value.toFixed(2)}, flex: 2}
   ];
   
   function CustomFooterComponent(
@@ -149,22 +159,22 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     if (period == 'month' || period == 'lastmonth') {
       end_date = startDate.add(1, 'month');
       for (let date = startDate; date <= end_date; date = date.add(1, 'day')) {
-        result.push({id: date.format('YYYY-MM-DD'), x: date.format('DD'), energy: 0, timestamp: date.unix()});
+        result.push({id: date.format('YYYY-MM-DD'), x: date.format('DD'), energy: 0, timestamp: date.unix(), price: 0});
       }
     } else if (period == "48hours" || period == "last48hours") {
       end_date = startDate.add(48, 'hours');
       for (let date = startDate; date <= end_date; date = date.add(1, 'hour')) {
-        result.push({id: date.format('YYYY-MM-DD-HH'), x: date.format('DD') + '\n' + date.format('HH'), energy: 0, timestamp: date.unix()});
+        result.push({id: date.format('YYYY-MM-DD-HH'), x: date.format('DD') + '\n' + date.format('HH'), energy: 0, timestamp: date.unix(), price: 0});
       } 
     } else if (period == "year") {
       end_date = startDate.add(1, 'year');
       for (let date = startDate; date <= end_date; date = date.add(1, 'month')) {
-        result.push({id: date.format('YYYY-MM'), x: date.format('MMM'), energy: 0, timestamp: date.unix()});
+        result.push({id: date.format('YYYY-MM'), x: date.format('MMM'), energy: 0, timestamp: date.unix(), price: 0});
       } 
     } else if (period == "overall") {
       end_date = dayjs().add(1, 'year').startOf('year').startOf('day');
       for (let date = startDate; date <= end_date; date = date.add(1, 'year')) {
-        result.push({id: date.format('YYYY'), x: date.format('YYYY'), energy: 0, timestamp: date.unix()});
+        result.push({id: date.format('YYYY'), x: date.format('YYYY'), energy: 0, timestamp: date.unix(), price: 0});
       } 
     }
 
@@ -196,6 +206,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           if (start >= bstart && end <= bend) {
             // Here!
             result[bucket_index].energy += ((sessionData[i].hourly_history[ci].wh??0) / 1000.0);
+            result[bucket_index].price += ((sessionData[i].hourly_history[ci].price??0));
             break;
           }
         }
@@ -283,7 +294,16 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         xAxis={
           [{ scaleType: 'band', dataKey: 'x'}]
         }
-        series={[{ dataKey: 'energy', label: "Energy (kWh)"}]}
+        yAxis={[
+          { id: 'energyAxis', scaleType: 'linear' },
+          { id: 'priceAxis', scaleType: 'linear' }
+        ]}
+        series={[
+          { dataKey: 'energy', label: "Energy (kWh)", yAxisId: 'energyAxis'},
+          { dataKey: 'price', label: PRICE_HEADER, yAxisId: 'priceAxis'}
+        ]}
+        leftAxis="energyAxis"
+        rightAxis="priceAxis"
         grid={{ horizontal: true }}
         height={400}
       />
