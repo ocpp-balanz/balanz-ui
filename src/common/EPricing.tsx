@@ -22,7 +22,7 @@ const zone_prices = new Map();
 
 function tarif(start_time: Dayjs): number {
   // Base tariff / kwh
-  const base_tariff = .72;  // Ex-VAT
+  const base_tariff = .72 + .135;  // Ex-VAT
   // https://radiuselnet.dk/elnetkunder/tariffer-og-netabonnement/
   const winter_tariff = [0.0976, 0.2929, 0.8788];  // Winter ex-VAT
   const summer_tariff = [0.0976, 0.1465, 0.3808];  // Summer ex-VAT
@@ -107,7 +107,8 @@ export function price_session_data(sessionData: Array<SESSION>, chargerData: Arr
           const kwh = (hour_entries[hour_index].wh??0) / 1000.0;
           const spot_price = zone_prices.get("DK2").get(hour_ds) * kwh;
           const tariff_price = tarif(hour) * kwh;
-          hour_entries[hour_index].price = spot_price + tariff_price;
+          const addon_price = 0.05 * kwh;  // E.g. for ensuring green energy, or otherwise
+          hour_entries[hour_index].price = spot_price + tariff_price + addon_price;
           total_price += hour_entries[hour_index].price??0;
       }
     }

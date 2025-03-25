@@ -15,6 +15,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { augment_session_data} from '../common/SessionSupport';
 import { price_session_data, price_currency} from '../common/EPricing';
+import { axisClasses } from '@mui/x-charts/ChartsAxis';
 
 const PRICE_HEADER = 'Price (' + price_currency() + ')';
 
@@ -309,8 +310,8 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           [{ scaleType: 'band', dataKey: 'x'}]
         }
         yAxis={[
-          { id: 'energyAxis', scaleType: 'linear' },
-          { id: 'priceAxis', scaleType: 'linear' }
+          { id: 'energyAxis', scaleType: 'linear', label: "kWh" },
+          { id: 'priceAxis', scaleType: 'linear', label: price_currency() }
         ]}
         series={[
           { dataKey: 'energy', label: "Energy (kWh)", yAxisId: 'energyAxis'},
@@ -319,7 +320,16 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         leftAxis="energyAxis"
         rightAxis="priceAxis"
         grid={{ horizontal: true }}
-        height={400}
+        height={500}
+        margin={{ left: 70, right: 70 }}
+        sx={{
+          [`.${axisClasses.left} .${axisClasses.label}`]: {
+            transform: 'translate(-10px, 0)',
+          },
+          [`.${axisClasses.right} .${axisClasses.label}`]: {
+            transform: 'translate(+10px, 0)',
+          },
+        }}
       />
       <DataGrid 
         hideFooterPagination={true}
