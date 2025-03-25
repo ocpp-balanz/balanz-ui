@@ -34,6 +34,9 @@ function tarif(start_time: Dayjs): number {
     return winter_tariff[time_index] + base_tariff;
 }
 
+console.log("TEST: " + tarif(dayjs("2025-03-25T15:00:00T01:00")));
+
+
 function download_prices(start_time: number) {
   const call_api = async(url: string) => {
     const response = await fetch(url, {mode:'cors'});
@@ -54,7 +57,11 @@ function download_prices(start_time: number) {
                   console.log("No data for " + date_string);
                   const url = "https://www.elprisenligenu.dk/api/v1/prices/" + date.format("YYYY") + "/" + date.format("MM-DD") + "_" + ZONES[zindex] + ".json";
                   const data = await call_api(url);
-                  setItem(storage_ix, JSON.stringify(data));
+                  if (data != null) {
+                    setItem(storage_ix, JSON.stringify(data));
+                    console.log("Failed to get data for " + date_string + ", url:" + url);
+                    continue;
+                  }
               }
               // @ts-expect-error
               const price_data: Array<HOUR_PRICE> = JSON.parse(getItem<Array<HOUR_PRICE>>(storage_ix));

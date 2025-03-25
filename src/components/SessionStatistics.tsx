@@ -77,12 +77,12 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     { field: 'id', headerName: 'Timestamp', flex: 2},
     { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value: number) => {return value.toFixed(3)}, flex: 2},
     { field: 'price', headerName: PRICE_HEADER, type: 'number', valueGetter: (value: number) => {return value.toFixed(2)}, flex: 2},
-    { field: 'avprice', headerName: "Average Price", type: 'number',       
-      renderCell: (params) => {
-        if (params.row.energy == 0) 
-          return (<></>);
+    { field: 'avprice', headerName: "Average Price (" + price_currency() + "/kWh)", type: 'number',       
+      valueGetter: (_, row) => {
+        if (row.energy == 0) 
+          return 0;
         else
-          return (<>{(params.row.price / params.row.energy).toFixed(2)}</>);
+          return (row.price / row.energy).toFixed(2);
       },
       flex: 2}
   ];
@@ -93,7 +93,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     return (
       <>
         <Divider />
-        <Box sx={{ mx: 1.1, my: 1, display: "flex"}}>
+        <Box  sx={{ display: 'flex', flexDirection: 'row', mx: 1.1, my: 1}}>
           <Box flex={1} alignContent="left"><b>Total</b></Box>
           <Box flex={1} alignContent="right"><b>{props.total?.toFixed(3)}</b></Box>
           <Box flex={1} alignContent="right"><b>{props.totalPrice?.toFixed(2)}</b></Box>
@@ -336,7 +336,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
         rows={dataset}
         columns={columns}
         density="compact"
-        sx={{fontSize: '.8rem', width:450}}
+        sx={{fontSize: '.8rem', width:500}}
         slots={{ toolbar: CustomToolbar, footer: CustomFooterComponent }}
         slotProps={{
           footer: { total, totalPrice}
