@@ -76,6 +76,14 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData, chargerDat
     { field: 'end_time', headerName: 'End Time', flex: 2, valueGetter: (value) => format_time(value)},
     { field: 'energy_meter', headerName: 'Energy (kWh)', flex: 1, type: 'number', valueGetter: (value) => {return (value/1000).toFixed(3)}},
     { field: 'price', headerName: PRICE_HEADER, flex: 1, type: 'number', valueGetter: (value: number) => {return value.toFixed(2)}},
+    { field: 'avprice', headerName: price_currency() + "/kWh", flex: 1, type: 'number', 
+      valueGetter: (_, row) => {
+        if (row.energy_meter == 0) 
+          return 0;
+        else
+          return (1000.0 * row.price / row.energy_meter).toFixed(2);
+      },
+    },
     { field: 'reason', headerName: 'Reason', flex: 2},
     { field: 'history', 
       headerName: 'Hist',
