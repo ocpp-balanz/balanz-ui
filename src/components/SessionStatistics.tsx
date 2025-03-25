@@ -126,7 +126,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   // a net Wh usage value will be added.
   useEffect(() => {
     augment_session_data(sessionData);
-    price_session_data(sessionData)
+    price_session_data(sessionData, chargerData)
     setSessionAugmented(true);
   },
   [sessionData, sessionAugmented]);

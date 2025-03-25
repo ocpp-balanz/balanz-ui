@@ -72,14 +72,6 @@ export type USER = {
   description: string;
 };
 
-export type HOUR_PRICE = {
-  DKK_per_kWh: number;
-  EUR_per_kWh: number;
-  EXR: number;
-  time_start: Date;
-  time_end: Date;
-};
-
 export type DATAENTRY = {
     id: string;
     timestamp: number;

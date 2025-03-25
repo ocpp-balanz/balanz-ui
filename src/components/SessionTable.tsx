@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
-import { CHARGING_ENTRY, SESSION } from '../types/types';
+import { CHARGING_ENTRY, SESSION, CHARGER } from '../types/types';
 import { DataGrid, GridColDef, GridRowModel, GridRowId, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import ChargingHistory from './ChargingHistory';
 import { format_time } from '../common/utils';
 import { Button, Stack, Box } from '@mui/material';
 import BalanzAPI from '../services/balanz_api';
 import { augment_session_data} from '../common/SessionSupport';
-import { price_session_data} from '../common/EPricing';
+import { price_session_data, price_currency} from '../common/EPricing';
 
+const PRICE_HEADER = 'Price (' + price_currency() + ')';
 
 interface SessionTableProps {
   api: BalanzAPI;
   sessionData: Array<SESSION>;
+  chargerData: Array<CHARGER>;
 };
 
-const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
+const SessionTable: React.FC<SessionTableProps> = ({api, sessionData, chargerData}) => {
   const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
   
   function get_history_data(history: Array<CHARGING_ENTRY>): Array<CHARGING_ENTRY> {
@@ -28,7 +30,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
     // a net Wh usage value will be added.
     useEffect(() => {
       augment_session_data(sessionData);
-      price_session_data(sessionData);
+      price_session_data(sessionData, chargerData);
       setSessionAugmented(true);
     },
     [sessionData, sessionAugmented]);
@@ -73,7 +75,7 @@ const SessionTable: React.FC<SessionTableProps> = ({api, sessionData}) => {
     { field: 'start_time', headerName: 'Start Time', flex: 2, valueGetter: (value) => format_time(value)}, 
     { field: 'end_time', headerName: 'End Time', flex: 2, valueGetter: (value) => format_time(value)},
     { field: 'energy_meter', headerName: 'Energy (kWh)', flex: 1, type: 'number', valueGetter: (value) => {return (value/1000).toFixed(3)}},
-    { field: 'price', headerName: 'Price', flex: 1, type: 'number', valueGetter: (value) => {return value.toFixed(2)}},
+    { field: 'price', headerName: PRICE_HEADER, flex: 1, type: 'number', valueGetter: (value: number) => {return value.toFixed(2)}},
     { field: 'reason', headerName: 'Reason', flex: 2},
     { field: 'history', 
       headerName: 'Hist',
