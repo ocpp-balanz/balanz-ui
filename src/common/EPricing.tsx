@@ -57,10 +57,11 @@ function download_prices(start_time: number) {
                   console.log("No data for " + date_string);
                   const url = "https://www.elprisenligenu.dk/api/v1/prices/" + date.format("YYYY") + "/" + date.format("MM-DD") + "_" + ZONES[zindex] + ".json";
                   const data = await call_api(url);
-                  if (data != null) {
-                    setItem(storage_ix, JSON.stringify(data));
+                  if (data == null) {
                     console.log("Failed to get data for " + date_string + ", url:" + url);
                     continue;
+                  } else {
+                    setItem(storage_ix, JSON.stringify(data));
                   }
               }
               // @ts-expect-error
@@ -108,7 +109,7 @@ export function price_session_data(sessionData: Array<SESSION>, chargerData: Arr
 
       const hour = dayjs(hour_entries[hour_index].date).startOf("hour");
       const hour_ds = hour.unix();
-      if (zone_prices.get(zone).get(hour_ds) == undefined) {
+      if (!zone_prices.has(zone) || !zone_prices.get(zone).has(hour_ds)) {
         console.log("WARNING: Could not find price.", hour_ds);
       } else {
           const kwh = (hour_entries[hour_index].wh??0) / 1000.0;
