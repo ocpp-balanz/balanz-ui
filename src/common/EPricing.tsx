@@ -27,7 +27,7 @@ function tarif(start_time: Dayjs): number {
   const winter_tariff = [0.0976, 0.2929, 0.8788];  // Winter ex-VAT
   const summer_tariff = [0.0976, 0.1465, 0.3808];  // Summer ex-VAT
   const start_hour = start_time.hour();
-  const time_index = (start_hour >= 0 && start_hour <= 6)?0: (start_hour >= 17 && start_hour <= 21)?2: 1;
+  const time_index = (start_hour >= 0 && start_hour < 6)?0: (start_hour >= 17 && start_hour < 21)?2: 1;
   if (start_time.month() >= 3 && start_time.month() <= 8)   // April to September
     return summer_tariff[time_index] + base_tariff;
   else
