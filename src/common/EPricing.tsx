@@ -34,8 +34,18 @@ function tarif(start_time: Dayjs): number {
     return winter_tariff[time_index] + base_tariff;
 }
 
-console.log("TEST: " + tarif(dayjs("2025-03-25T15:00:00T01:00")));
+function total_kwh_price(start_time: Dayjs = dayjs().startOf("hour"), zone: string = "DK2"): number {
+  const start_unix = start_time.unix();
+  if (!zone_prices.has(zone) || !zone_prices.get(zone).has(start_unix)) {
+    console.log("WARNING: Could not find price.", start_time);
+    return 0;
+  }
 
+  const spot_price = zone_prices.get(zone).get(start_unix);
+  const tariff_price = tarif(start_time);
+  const addon_price = 0.05;  // E.g. for ensuring green energy, or otherwise
+  return spot_price + tariff_price + addon_price;
+}
 
 function download_prices(start_time: number) {
   const call_api = async(url: string) => {
@@ -79,6 +89,8 @@ function download_prices(start_time: number) {
       }
   }
   date_loop();
+  console.log("TEST2: " +  total_kwh_price());
+
 }
 
 export function price_session_data(sessionData: Array<SESSION>, chargerData: Array<CHARGER>) {
@@ -108,17 +120,9 @@ export function price_session_data(sessionData: Array<SESSION>, chargerData: Arr
           continue;
 
       const hour = dayjs(hour_entries[hour_index].date).startOf("hour");
-      const hour_ds = hour.unix();
-      if (!zone_prices.has(zone) || !zone_prices.get(zone).has(hour_ds)) {
-        console.log("WARNING: Could not find price.", hour_ds);
-      } else {
-          const kwh = (hour_entries[hour_index].wh??0) / 1000.0;
-          const spot_price = zone_prices.get("DK2").get(hour_ds) * kwh;
-          const tariff_price = tarif(hour) * kwh;
-          const addon_price = 0.05 * kwh;  // E.g. for ensuring green energy, or otherwise
-          hour_entries[hour_index].price = spot_price + tariff_price + addon_price;
-          total_price += hour_entries[hour_index].price??0;
-      }
+      const kwh = (hour_entries[hour_index].wh??0) / 1000.0;
+      hour_entries[hour_index].price = total_kwh_price(hour, zone) * kwh;
+      total_price += hour_entries[hour_index].price??0;
     }
     sessionData[i].price = total_price;
   }
