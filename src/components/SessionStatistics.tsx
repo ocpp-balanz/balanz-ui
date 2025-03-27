@@ -76,9 +76,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
     setCharger(event.target.value as string);
   };
 
-  const columns: GridColDef<DATAENTRY>[] = [
+  let columns: GridColDef<DATAENTRY>[] = [
     { field: 'id', headerName: 'Timestamp', flex: 2},
-    { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value: number) => {return value.toFixed(3)}, flex: 2},
+    { field: 'energy', headerName: 'Energy (kWh)', type: 'number', valueGetter: (value: number) => {return value.toFixed(3)}, flex: 2}
+  ];
+  if (showRight) {
+    columns = [
+      ...columns,
     { field: 'price', headerName: PRICE_HEADER, type: 'number', valueGetter: (value: number) => {return value.toFixed(2)}, flex: 2},
     { field: 'avprice', headerName: "Average Price (" + price_currency() + "/kWh)", type: 'number',       
       valueGetter: (_, row) => {
@@ -88,7 +92,8 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           return (row.price / row.energy).toFixed(2);
       },
       flex: 2}
-  ];
+    ];
+  }
   
   // Set start date chooser upon new period set.
   useEffect(() => {
