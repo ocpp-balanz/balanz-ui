@@ -51,6 +51,7 @@ function CustomToolbar() {
 const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, groupData, chargerData}) => {
   const [period, setPeriod] = useState<string>('last48hours');
   const [group, setGroup] = useState<string>('(all)');
+  const [showRight, setShowRight] = useState<boolean>(false);
   const [charger, setCharger] = useState<string>('(all)');
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
   const [totalRow, setTotalRow] = useState<Array<DATAENTRY>>([]);
@@ -60,6 +61,10 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
 
   const handlePeriodChange = (event: SelectChangeEvent) => {
     setPeriod(event.target.value as string);
+  };
+
+  const handleRightChange = (event: SelectChangeEvent) => {
+    setShowRight(event.target.value as string === "true");
   };
 
   const handleGroupChange = (event: SelectChangeEvent) => {
@@ -223,6 +228,17 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   }, 
   [period, group, charger, sessionData, sessionAugmented, startDate]);
 
+  // Setup right axis stuff
+  let yAxis=[{ id: 'energyAxis', scaleType: 'linear', label: "kWh" }];
+  if (showRight)
+    yAxis.push({ id: 'priceAxis', scaleType: 'linear', label: price_currency()});
+  let series=[{ dataKey: 'energy', label: "Energy (kWh)", yAxisId: 'energyAxis'}];
+  if (showRight)
+    series.push({dataKey: 'price', label: PRICE_HEADER, yAxisId: 'priceAxis'});
+  let rightAxis = null;
+  if (showRight)
+    rightAxis = "priceAxis";
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Box>
@@ -291,21 +307,30 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
           : ""}
         </Select>
       </FormControl>
+      <FormControl sx={{m: 1, minWidth: 100}}>
+        <InputLabel id="select-right">Show Prices</InputLabel>
+        <Select
+          labelId="select-right"
+          id="select-right"
+          value={showRight?"true":"false"}
+          label="Show Prices"
+          onChange={handleRightChange}
+          sx={{fontSize: '.9rem'}}
+        >
+          <MenuItem value={'false'} sx={{fontSize: '.9rem'}}>Do not show</MenuItem>
+          <MenuItem value={'true'} sx={{fontSize: '.9rem'}}>Show</MenuItem>
+        </Select>
+      </FormControl>
       <BarChart
         dataset={dataset}
         xAxis={
           [{ scaleType: 'band', dataKey: 'x'}]
         }
-        yAxis={[
-          { id: 'energyAxis', scaleType: 'linear', label: "kWh" },
-          { id: 'priceAxis', scaleType: 'linear', label: price_currency() }
-        ]}
-        series={[
-          { dataKey: 'energy', label: "Energy (kWh)", yAxisId: 'energyAxis'},
-          { dataKey: 'price', label: PRICE_HEADER, yAxisId: 'priceAxis'}
-        ]}
+        // @ts-expect-error
+        yAxis={yAxis}
+        series={series}
         leftAxis="energyAxis"
-        rightAxis="priceAxis"
+        rightAxis={rightAxis}
         grid={{ horizontal: true }}
         height={500}
         margin={{ left: 70, right: 70 }}
