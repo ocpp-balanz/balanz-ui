@@ -54,8 +54,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
   const [group, setGroup] = useState<string>('(all)');
   const [charger, setCharger] = useState<string>('(all)');
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
-  const [total, setTotal] = useState<number>(0);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [totalRow, setTotalRow] = useState<Array<DATAENTRY>>([]);
   const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
   const [dateview, setDateview] = useState<Array<String>>(['year', 'month', 'day']);
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().subtract(48, 'hours'));
@@ -142,8 +141,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       sum += dataset[i].energy;
       sum_price += dataset[i].price;
     }
-    setTotal(sum);
-    setTotalPrice(sum_price);
+    setTotalRow([{
+      id: 'Total',
+      timestamp: 0,
+      x: 'Total',
+      energy: sum,
+      price: sum_price
+    }]);
   }, 
   [dataset]);
 
@@ -333,14 +337,11 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       />
       <DataGrid 
         hideFooterPagination={true}
-        rows={dataset}
+        rows={dataset.concat(totalRow)}
         columns={columns}
         density="compact"
         sx={{fontSize: '.8rem', width:500}}
-        slots={{ toolbar: CustomToolbar, footer: CustomFooterComponent }}
-        slotProps={{
-          footer: { total, totalPrice}
-        }}
+        slots={{ toolbar: CustomToolbar}}
       />
     </Box>
     </LocalizationProvider>
