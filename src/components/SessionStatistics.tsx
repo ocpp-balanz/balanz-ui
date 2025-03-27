@@ -7,8 +7,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarExport, GridSlotsComponentsProps } from '@mui/x-data-grid';
-import { Divider } from '@mui/material';
+import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarExport} from '@mui/x-data-grid';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -86,22 +85,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({sessionData, group
       flex: 2}
   ];
   
-  function CustomFooterComponent(
-    props: NonNullable<GridSlotsComponentsProps['footer']>,
-  ) {
-    return (
-      <>
-        <Divider />
-        <Box  sx={{ display: 'flex', flexDirection: 'row', mx: 1.1, my: 1}}>
-          <Box flex={1} alignContent="left"><b>Total</b></Box>
-          <Box flex={1} alignContent="right"><b>{props.total?.toFixed(3)}</b></Box>
-          <Box flex={1} alignContent="right"><b>{props.totalPrice?.toFixed(2)}</b></Box>
-          <Box flex={1} alignContent="right"><b>{((props.totalPrice??0) / (props.total??1)).toFixed(2)}</b></Box>
-        </Box>
-      </>
-    );
-  }
-    
   // Set start date chooser upon new period set.
   useEffect(() => {
     if (period === "last48hours") {
