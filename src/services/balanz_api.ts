@@ -34,38 +34,21 @@ export default class BalanzAPI {
             setConnState(CONN_STATE.CONNECTED);
     }
 
-    private async _wait_connected(): Promise<void> {
-        // Wait up to 5 seconds for connection
-        for (let i = 0; i < 50; i++) {
-            await sleep(100);
-            if (this.connected)
-                break;
-        }
-    }
-
     async reconnect(): Promise<void> {
+        if (this.connected)
+            return;  // No need
         while (true) {
             // Let's attempt to reconnect, but wait first
             await sleep(5000);
-            console.log("Attempting to reconnect to " + this.url);
-            
-            if (this.ws)
-                this.ws.close();
-            this.connect();
-            await this._wait_connected();
-            if (this.connected) {
-                console.log("Reconnected OK.");
-
-                if (this.token != "") {
-                    // Otherwise, let's try to also login again.
-                    const user_type = await this.login(this.token);
-                    console.log("Succesfully logged in again");
-                    if (user_type == "") {
-                        console.log("Failed to login again.");
-                        this.token = "";
-                    }
-                }
+            if (this.connected)
                 break;
+            console.log("Attempting to reconnect to " + this.url);
+            this.connect();
+            // Wait 5s total
+            for (let i = 0; i < 50; i++) {
+                await sleep(100);
+                if (this.connected)
+                    break;
             }
         }
     }
