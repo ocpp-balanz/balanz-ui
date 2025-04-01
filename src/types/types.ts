@@ -1,3 +1,9 @@
+export enum CONN_STATE {
+  NOT_CONNECTED,
+  CONNECTED,
+  LOGGED_IN
+};
+
 export type CONNECTOR = {
   state: string;
 };

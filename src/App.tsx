@@ -4,6 +4,7 @@ import { Container } from '@mui/material';
 import ResponsiveAppBar from './components/ResponsiveAppBar';
 import BalanzAPI from './services/balanz_api';
 import Loader from './common/Loader';
+import NoConnection from './common/NoConnection';
 import Chargers from './pages/Chargers';
 import Groups from './pages/Groups';
 import Tags from './pages/Tags';
@@ -12,6 +13,7 @@ import Status from './pages/Status';
 import Login from './pages/Login';
 import Sessions from './pages/Sessions';
 import Users from './pages/Users';
+import { CONN_STATE } from './types/types';
 
 import './App.css'
 
@@ -22,7 +24,7 @@ interface AppProp {
 const App: React.FC<AppProp> = ({ api }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [token, setToken] = useState<string>("");
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const [connState, setConnState] = useState<CONN_STATE>(CONN_STATE.NOT_CONNECTED);
   const [userType, setUserType] = useState<string>("");
   const [doingLogin, setDoingLogin] = useState<boolean>(false);
 
@@ -34,16 +36,18 @@ const App: React.FC<AppProp> = ({ api }) => {
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
+    api.set_connstate_func(setConnState);
+    api.connect();
   }, []);
 
   useMemo(() => {
     const doLogin = async() => {
-      if (token != "" && api) {
+      if (token != "" && connState == CONN_STATE.CONNECTED) {
+        console.log("Logging in");
         setDoingLogin(true);
         const user_type = await api.login(token);
         if (user_type != "") {
           setUserType(user_type);
-          setLoggedIn(true);
           console.log("Logged in as", user_type);
         }  
         setDoingLogin(false);
@@ -56,11 +60,17 @@ const App: React.FC<AppProp> = ({ api }) => {
   if (loading)
       return (<Loader />);
 
-  if (!loggedIn)
+  if (connState == CONN_STATE.NOT_CONNECTED)
     return (
-      <Login setToken={setToken} showLoginFailure={token != "" && !loggedIn && !doingLogin}/> 
+     <NoConnection /> 
     );
 
+  if (connState == CONN_STATE.CONNECTED)
+    return (
+      <Login setToken={setToken} showLoginFailure={token != "" && !doingLogin}/> 
+    );
+
+  // We know connState == CONN_STATE.LOGGED_IN at this point.
   if (userType == "Status" || userType == "SessionPriority") {
     return (
     <Container maxWidth={false} disableGutters>
