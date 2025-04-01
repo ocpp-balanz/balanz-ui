@@ -10,11 +10,9 @@ console.log("Setting balanz URL to", api_url);
 const api = new BalanzAPI(api_url);
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
     <Router>
      <App api={api} />
     </Router>
-  </React.StrictMode>,
 );
 
 

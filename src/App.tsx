@@ -55,7 +55,7 @@ const App: React.FC<AppProp> = ({ api }) => {
     }
     doLogin();
   }, 
-  [token]);
+  [token, connState]);
 
   if (loading)
       return (<Loader />);

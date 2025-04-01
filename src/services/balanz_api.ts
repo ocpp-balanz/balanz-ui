@@ -13,8 +13,6 @@ function sleep(ms: number): Promise<void> {
 export default class BalanzAPI {
     ws: WebSocket|null;
     outstanding_calls: Map<string, CallFunction>;
-    logged_in: boolean = false;
-    logged_in_user_type: string = "";
     token: string;
     url: string;
     connected: boolean = false;
@@ -24,8 +22,6 @@ export default class BalanzAPI {
         this.url = url;
         this.token = "";
         this.outstanding_calls = new Map<string, CallFunction>();
-        this.logged_in = false;
-        this.logged_in_user_type = "";
         this.connected = false;
         this.setConnState = null;
         this.ws = null;
@@ -39,7 +35,8 @@ export default class BalanzAPI {
     }
 
     private async _wait_connected(): Promise<void> {
-        for (let i = 0; i < 30; i++) {
+        // Wait up to 5 seconds for connection
+        for (let i = 0; i < 50; i++) {
             await sleep(100);
             if (this.connected)
                 break;
@@ -50,9 +47,10 @@ export default class BalanzAPI {
         while (true) {
             // Let's attempt to reconnect, but wait first
             await sleep(5000);
+            console.log("Attempting to reconnect to " + this.url);
             
-            // Then login again
-            console.log(this);
+            if (this.ws)
+                this.ws.close();
             this.connect();
             await this._wait_connected();
             if (this.connected) {
@@ -60,13 +58,13 @@ export default class BalanzAPI {
 
                 if (this.token != "") {
                     // Otherwise, let's try to also login again.
-                    this.logged_in_user_type = await this.login(this.token);
+                    const user_type = await this.login(this.token);
                     console.log("Succesfully logged in again");
-                    if (this.logged_in_user_type == "") {
+                    if (user_type == "") {
                         console.log("Failed to login again.");
+                        this.token = "";
                     }
                 }
-
                 break;
             }
         }
@@ -76,10 +74,9 @@ export default class BalanzAPI {
         this.ws = new WebSocket(this.url, ["ocpp1.6"]);
 
         this.ws.onclose = () => {
-            this.connected = false;
-            this.logged_in = false;
             if (this.setConnState)
                 this.setConnState(CONN_STATE.NOT_CONNECTED);
+            this.connected = false;
             console.log('balanz WebSocket closed');
 
             // Set up timer to try reconneting
@@ -87,15 +84,13 @@ export default class BalanzAPI {
         };
 
         this.ws.onopen = () => {
-            this.connected = true;
             if (this.setConnState)
                 this.setConnState(CONN_STATE.CONNECTED);
+            this.connected = true;
             console.log('balanz WebSocket connected');
         };
 
         this.ws.onerror = () => {
-            if (this.setConnState)
-                this.setConnState(CONN_STATE.NOT_CONNECTED);
             console.log('balanz WebSocket error');
         };
     
@@ -173,13 +168,12 @@ export default class BalanzAPI {
     async login(token: string): Promise<string> {
         const [ok, payload] = await this.call("Login", {"token": token});
         if (ok == 3) {
-            this.logged_in = true;
-            this.logged_in_user_type = payload["user_type"];
-            console.log("Succesfully logged in as " + this.logged_in_user_type);
+            const user_type = payload["user_type"];
+            console.log("Succesfully logged in as " + user_type);
             this.token = token;
             if (this.setConnState)
                 this.setConnState(CONN_STATE.LOGGED_IN);
-            return this.logged_in_user_type;
+            return user_type;
         } else {
             console.log("Login failed", payload);
             return "";
