@@ -88,7 +88,9 @@ function download_prices(start_time: number) {
           }
       }
   }
-  date_loop();
+  (async () => {
+    await date_loop();
+  })();
   console.log("TEST2: " +  total_kwh_price());
 
 }

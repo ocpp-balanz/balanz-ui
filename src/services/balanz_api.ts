@@ -1,14 +1,11 @@
 import { Dispatch, SetStateAction } from "react";
 import { CONN_STATE } from '../types/types';
+import { sleep } from '../common/utils';
 
 type BalanzResult = [number, any];
 type CallFunction = {
     resolve: Function;
 };
-
-function sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 export default class BalanzAPI {
     ws: WebSocket|null;
