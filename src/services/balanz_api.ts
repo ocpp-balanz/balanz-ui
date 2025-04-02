@@ -38,13 +38,11 @@ export default class BalanzAPI {
         if (this.connected)
             return;  // No need
         while (true) {
-            // Let's attempt to reconnect, but wait first
-            await sleep(5000);
             if (this.connected)
                 break;
             console.log("Attempting to reconnect to " + this.url);
             this.connect();
-            // Wait 5s total
+            // Wait 5s total, checking every 100 ms
             for (let i = 0; i < 50; i++) {
                 await sleep(100);
                 if (this.connected)
@@ -55,6 +53,8 @@ export default class BalanzAPI {
 
     connect(): void {
         this.ws = new WebSocket(this.url, ["ocpp1.6"]);
+            if (this.setConnState)
+                this.setConnState(CONN_STATE.NOT_CONNECTED);
 
         this.ws.onclose = () => {
             if (this.setConnState)
@@ -67,9 +67,12 @@ export default class BalanzAPI {
         };
 
         this.ws.onopen = () => {
-            if (this.setConnState)
-                this.setConnState(CONN_STATE.CONNECTED);
-            this.connected = true;
+            // Wait a bit before considering the connection established
+            setTimeout(() => {
+                this.connected = true;
+                if (this.setConnState) 
+                    this.setConnState(CONN_STATE.CONNECTED)
+            }, 1500);
             console.log('balanz WebSocket connected');
         };
 
