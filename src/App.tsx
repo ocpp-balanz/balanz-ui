@@ -35,9 +35,9 @@ const App: React.FC<AppProp> = ({ api }) => {
   }, [pathname]);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
     api.set_connstate_func(setConnState);
     api.connect();
+    setTimeout(() => setLoading(false), 2000);
   }, []);
 
   useMemo(() => {
