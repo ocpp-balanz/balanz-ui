@@ -156,9 +156,17 @@ export default class BalanzAPI {
             this.token = token;
             if (this.setConnState)
                 this.setConnState(CONN_STATE.LOGGED_IN);
+
+            // Store cookie with login token for 12 hours
+            const now = new Date(); 
+            const expiry = new Date(now.getTime() + 12 * 60 * 60 * 1000);
+            document.cookie = `token=${token}; expires=${expiry.toUTCString()}; path=/`;
+
             return user_type;
         } else {
             console.log("Login failed", payload);
+            // Clear token cookie
+            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             return "";
         }
     }

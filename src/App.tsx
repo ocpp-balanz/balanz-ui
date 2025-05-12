@@ -65,10 +65,24 @@ const App: React.FC<AppProp> = ({ api }) => {
      <NoConnection /> 
     );
 
-  if (connState == CONN_STATE.CONNECTED)
-    return (
-      <Login setToken={setToken} showLoginFailure={token != "" && !doingLogin}/> 
-    );
+  if (connState == CONN_STATE.CONNECTED) {
+    // Check if we have a token cookie from which to receive token
+    // If we do, we will try to log in with it.
+    let got_cookie = false;
+    if (token == "" && !doingLogin) {
+      const find_token = document.cookie.split('; ').find(row => row.startsWith('token='));
+      if (find_token) {
+        const cookie_token = find_token.split('=')[1];
+        setToken(cookie_token);
+        got_cookie = true;
+      }
+    }
+    // If we don't, we will show the login page.
+    if (!got_cookie)
+      return (
+        <Login setToken={setToken} showLoginFailure={token != "" && !doingLogin}/> 
+      );
+  }
 
   // We know connState == CONN_STATE.LOGGED_IN at this point.
   if (userType == "Status" || userType == "SessionPriority") {
