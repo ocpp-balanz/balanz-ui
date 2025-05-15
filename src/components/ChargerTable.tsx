@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Snackbar from '@mui/material/Snackbar';
 import ResetCharger from './ResetCharger';
+import ResetChargerAuthKey from './ResetChargerAuthKey';
 import DeleteCharger from './DeleteCharger';
 
 interface ChargerTableProps {
@@ -95,15 +96,15 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
   [api]);
 
   const columns: GridColDef<(typeof chargerData)[number]>[] = [
-    { field: 'charger_id', headerName: 'ID', flex: 3, editable: true },
+    { field: 'charger_id', headerName: 'ID', flex: 2, editable: true },
     { field: 'alias', headerName: 'Alias', flex: 2, editable: true },
-    { field: 'group_id', headerName: 'Group', flex: 2, editable: true },
-    { field: 'description', headerName: 'Description', flex: 4, editable: true},
+    { field: 'group_id', headerName: 'Group', flex: 1, editable: true },
+    { field: 'description', headerName: 'Description', flex: 3, editable: true},
     { field: 'priority', headerName: 'Priority', type: 'number', flex: 1, editable: true},
     { field: 'conn_max', headerName: 'Max A', type: 'number', flex: 1, editable: true},
     { field: 'firmware_version', headerName: 'Firmware Version', flex: 3},
-    { field: 'charge_point_vendor', headerName: 'Vendor', flex: 2},
-    { field: 'charge_point_model', headerName: 'Model', flex: 2},
+    { field: 'charge_point_vendor', headerName: 'Vendor', flex: 1},
+    { field: 'charge_point_model', headerName: 'Model', flex: 3},
     { field: 'no_connectors', headerName: '# Connectors', flex: 1, type: 'number', valueGetter: (_, charger) => {
         return Object.keys(charger["connectors"]).length;
       }
@@ -111,6 +112,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
     { field: 'reset', 
       headerName: 'Reset',
       description: 'Reset Charger',
+      sortable: false,
       disableColumnMenu: true,
       hideSortIcons: true,
       disableExport: true,
@@ -128,13 +130,41 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
           return (<></>);
       }, flex: .7
     },
-    { field: 'delete', headerName: '', flex: 1,
+    { field: 'delete', 
+      headerName: 'Delete', 
+      description: 'Delete Charger', 
+      flex: 1,
+      sortable: false,
+      disableColumnMenu: true, 
+      hideSortIcons: true,
+      disableExport: true,
         renderCell: (params) => {
           if (params.row.charger_id == BLANKCHARGER.charger_id)
             return <div></div>
           else
             return <DeleteCharger api={api} charger_id={params.row.charger_id} charger_alias={params.row.alias} snack={snack}/>;
         }
+    },
+    { field: 'authreset', 
+      headerName: 'Auth Reset',
+      description: 'Reset AuthorizationKey',
+      sortable: false,
+      disableColumnMenu: true,
+      hideSortIcons: true,
+      disableExport: true,
+      renderCell: (params) => {
+        if (userType == 'Admin')
+          return (
+            <ResetChargerAuthKey 
+              api={api} 
+              charger_id={params.row.charger_id} 
+              charger_alias={params.row.alias} 
+              snack={snack}
+            />
+          );
+        else 
+          return (<></>);
+      }, flex: .7
     },
   ];
 
