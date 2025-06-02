@@ -17,6 +17,7 @@ import CableIcon from '@mui/icons-material/Cable';
 import { Gauge } from '@mui/x-charts/Gauge';
 import Snackbar from '@mui/material/Snackbar';
 import RemoteStop from './RemoteStop';
+import RemoteStart from './RemoteStart';
 
 interface ChargingStatusTableProps {
   group: GROUP;
@@ -185,6 +186,26 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
           <ChargingHistory headline={"Charging History for " + params.row.id + " (" + params.row.alias + "). Start: " + params.row.start_time} 
             history={history_data} />);
       }, flex: .3,
+    },
+    { field: 'remotestart', 
+      headerName: 'Start',
+      description: 'Remotely Start Charging',
+      disableColumnMenu: true,
+      hideSortIcons: true,
+      renderCell: (params) => {
+        if (userType == 'Admin' && ['Preparing'].includes(params.row.status))
+          return (
+            <RemoteStart
+              api={api} 
+              charger_id={params.row.id.split("/")[0]} 
+              charger_alias={params.row.alias} 
+              connector_id={parseInt(params.row.id.split("/")[1])}
+              snack={snack}
+            />
+          );
+        else 
+          return (<></>);
+       }, flex: .3,
     },
     { field: 'remotestop', 
       headerName: 'Stop',
