@@ -82,4 +82,5 @@ export type LOGENTRY = {
   level: string;
   message: string;
   timestamp: string;
+  logger: string;
 }
