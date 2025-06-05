@@ -78,3 +78,8 @@ export type USER = {
   description: string;
 };
 
+export type LOGENTRY = {
+  level: string;
+  message: string;
+  timestamp: string;
+}
