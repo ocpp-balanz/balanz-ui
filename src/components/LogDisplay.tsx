@@ -1,39 +1,21 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
-import BalanzAPI from '../services/balanz_api';
 import Box from '@mui/material/Box';
+import { Grid } from '@mui/material';
 import { LOGENTRY } from '../types/types';
 
 interface LogDisplayProps {
-  api: BalanzAPI;
+  logs: LOGENTRY[];
 };
 
-const LogDisplay: React.FC<LogDisplayProps> = ({api}) => {
-  const [logs, setLogs] = useState<LOGENTRY[]>([]);
-
-  // Get tags
-  useEffect(() => {
-    const getLogs = async() => {
-        const [ok, payload] = await api.call("GetLogs", {});
-      if (ok == 3) {    
-        setLogs(payload["logs"]);
-        console.log("Succesfully retrieved logs, #", logs.length);
-      } else {
-        console.log("Error getting logs")  
-        setLogs([]);   
-      }
-    }
-    getLogs();
-  }, 
-  [api]);
-
+const LogDisplay: React.FC<LogDisplayProps> = ({logs}) => {
   return (
-    <Box sx={{ 
+    <Grid 
+        sx={{ 
         fontFamily: 'monospace', 
         mx: 1, 
         overflow: 'auto', 
         width: '100%', 
-        overflowX: 'auto',
+        overflowX: 'scroll',
         display: 'flex',
         flexDirection: 'column'}}>
         {logs.map((log, i) => {
@@ -43,9 +25,8 @@ const LogDisplay: React.FC<LogDisplayProps> = ({api}) => {
                 </Box>
             );
         })}  
-    </Box>
+    </Grid>
   );
 };
 
 export default LogDisplay;
-
