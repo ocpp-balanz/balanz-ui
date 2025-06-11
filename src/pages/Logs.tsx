@@ -135,7 +135,7 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
                     }}
                   />                
                 </Grid>
-                <Grid>
+                <Grid sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Button variant="contained" onClick={getLogs}>
                     Get Logs
                   </Button>
