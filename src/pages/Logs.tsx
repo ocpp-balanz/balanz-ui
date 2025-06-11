@@ -41,7 +41,7 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
     messageSearch: '',
     timeStampStart: dayjs().subtract(24, 'hour').format('YYYY-MM-DD HH:mm'),
     timeStampEnd: undefined,
-    logger: '',
+    logger: 'AUDIT',
   });
   const [logs, setLogs] = useState<LOGENTRY[]>([]);
 
