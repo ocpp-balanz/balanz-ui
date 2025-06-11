@@ -71,8 +71,8 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
   return (
     <React.Fragment>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Container maxWidth={false} disableGutters sx={{ mt: 2, fontSize: '.8rem' }}>
-            <Paper sx={{ padding: 2, marginBottom: 2 }}>
+        <Container maxWidth={false} disableGutters sx={{ fontSize: '.8rem' }}>
+            <Paper sx={{ padding: 2, marginBottom: 2, position: 'sticky', top: '55px', zIndex: 1, p: 2}}>
               <Grid container spacing={2}>
                 <Grid sx={{ width: '10%'}}>
                   <FormControl fullWidth>
