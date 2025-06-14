@@ -11,7 +11,6 @@ import { LOGENTRY } from '../types/types';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { SelectChangeEvent } from '@mui/material/Select';
 
 interface LogsProp {
   api: BalanzAPI;
@@ -23,18 +22,6 @@ type LogFilters = {
   timeStampEnd?: string;
   logger?: string;
 };
-
-const loggerOptions = [
-  'model',
-  'ocpp',
-  'balanz',
-  'cp_v16',
-  'websockets.client',
-  'websockets.server',
-  'api',
-  'user',
-  'AUDIT'
-];
 
 const Logs: React.FC<LogsProp> = ({ api }) => {
   const [filters, setFilters] = useState<LogFilters>({
@@ -55,10 +42,10 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
   const getLogs = async() => {
     const filtered = Object.fromEntries(
       Object.entries(filters).filter(
-        ([_, v]) => v !== undefined && v !== ''
+        ([_, v]) => v !== undefined && v !== '' && v != 'ALL'
       )
     );
-      const [ok, payload] = await api.call("GetLogs", {"filters": filtered});
+    const [ok, payload] = await api.call("GetLogs", {"filters": filtered});
     if (ok == 3) {    
       setLogs(payload["logs"]);
       console.log("Succesfully retrieved logs, #", logs.length);
@@ -76,26 +63,23 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
               <Grid container spacing={2}>
                 <Grid sx={{ width: '10%'}}>
                   <FormControl fullWidth>
-                    <InputLabel>Module</InputLabel>
+                    <InputLabel id="logger-label">Log Type</InputLabel>
                     <Select
-                      value={filters.logger}
+                      labelId="logger-label"
+                      value={filters.logger} // default to 'AUDIT'
                       label="Module"
-                      onChange={(e: SelectChangeEvent<string>) => {
+                      onChange={(e) => {
+                        const value = e.target.value;
                         setFilters((prev) => ({
                           ...prev,
-                          logger: e.target.value || undefined,
+                          logger: value
                         }));
                       }}
                     >
-                      <MenuItem value="">Any</MenuItem>
-                      {loggerOptions.map((logger) => (
-                        <MenuItem key={logger} value={logger}>
-                          {logger}
-                        </MenuItem>
-                      ))}
+                      <MenuItem value="ALL">All</MenuItem>
+                      <MenuItem value="AUDIT">Audit</MenuItem>
                     </Select>
-                  </FormControl>
-                </Grid>
+                  </FormControl>                </Grid>
                 <Grid sx={{ width: '30%'}}>
                   <TextField
                     label="Message Search"
