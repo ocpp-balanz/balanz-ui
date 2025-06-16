@@ -94,9 +94,17 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
         console.log("Error getting chargers");
       }
     }
+
     getChargers();
+    
+    const interval = setInterval(() => {
+      getChargers();
+     }, 10000);
+
+    return() => clearInterval(interval)    
   }, 
   [api]);
+
 
   const columns: GridColDef<(typeof chargerData)[number]>[] = [
     { field: 'charger_id', headerName: 'ID', flex: 2, editable: true },
