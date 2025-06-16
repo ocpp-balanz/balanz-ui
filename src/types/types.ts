@@ -28,6 +28,7 @@ export type CHARGER = {
   charge_box_serial_number: string;
   charge_point_model: string;
   charge_point_vendor: string;
+  meter_type: string;
   conn_max: number;
   firmware_version: string;
 };

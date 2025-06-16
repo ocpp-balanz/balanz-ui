@@ -105,6 +105,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
     { field: 'firmware_version', headerName: 'Firmware Version', flex: 3},
     { field: 'charge_point_vendor', headerName: 'Vendor', flex: 1},
     { field: 'charge_point_model', headerName: 'Model', flex: 3},
+    { field: 'meter_type', headerName: 'Type', flex: 1},
     { field: 'no_connectors', headerName: '# Connectors', flex: 1, type: 'number', valueGetter: (_, charger) => {
         return Object.keys(charger["connectors"]).length;
       }
