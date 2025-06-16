@@ -14,7 +14,7 @@ interface FirmwareTableProps {
 };
 
 const BLANKFirmware: FIRMWARE = { 
-  firmware_id: '(new Firmware)',
+  firmware_id: '(new firmware)',
   charge_point_vendor: '',
   charge_point_model: '',
   firmware_version: '',
@@ -74,7 +74,7 @@ const FirmwareTable: React.FC<FirmwareTableProps> = ({api}) => {
           return originalRow;
         }
       } else {
-        const [ok,] = await api.call("UpdateFirmware", payload);
+        const [ok,] = await api.call("ModifyFirmware", payload);
         if (ok == 3) {
           snack("Succesfully updated firmware");
           return updatedRow;
@@ -115,7 +115,7 @@ const FirmwareTable: React.FC<FirmwareTableProps> = ({api}) => {
   ];
 
   function getRowId(firmware: GridRowModel): GridRowId {
-    return firmware.Firmware_id;
+    return firmware.firmware_id;
   };
 
   function CustomToolbar() {
@@ -139,7 +139,7 @@ const FirmwareTable: React.FC<FirmwareTableProps> = ({api}) => {
         columns={columns}
         sx={{fontSize: '.8rem'}}
         processRowUpdate={processRowUpdate}
-        isCellEditable={(params: GridRowModel) => (params.field != 'firmware_id' && params.field != 'delete') || (params.field == 'Firmware_id' && params.value == BLANKFirmware.firmware_id) }
+        isCellEditable={(params: GridRowModel) => (params.field != 'firmware_id' && params.field != 'delete') || (params.field == 'firmware_id' && params.value == BLANKFirmware.firmware_id) }
     />
       <Snackbar
         open={open}
