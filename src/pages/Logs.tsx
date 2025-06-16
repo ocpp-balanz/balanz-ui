@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useState } from 'react';
 import {
-  TextField, Select, MenuItem, Button, Grid, Paper, InputLabel, FormControl
+  TextField, Select, MenuItem, Button, Grid, Paper, InputLabel, FormControl,
+  Box
 } from '@mui/material';
 import dayjs from 'dayjs';
 import BalanzAPI from '../services/balanz_api';
@@ -56,10 +57,10 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
   }
 
   return (
-    <React.Fragment>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Container maxWidth={false} disableGutters sx={{ fontSize: '.8rem' }}>
-            <Paper sx={{ padding: 2, marginBottom: 2, position: 'sticky', top: '55px', zIndex: 1, p: 2}}>
+            <Paper sx={{ padding: 2, marginBottom: 2, p: 2}}>
               <Grid container spacing={2}>
                 <Grid sx={{ width: '10%'}}>
                   <FormControl fullWidth>
@@ -126,10 +127,12 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
                 </Grid>
               </Grid>
             </Paper>
-          <LogDisplay logs={logs} />
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '800px' }}>
+            <LogDisplay logs={logs} />
+          </Box>
         </Container>
       </LocalizationProvider>
-    </React.Fragment>
+    </Box>
   );
 };
 
