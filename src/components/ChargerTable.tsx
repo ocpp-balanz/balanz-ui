@@ -10,6 +10,7 @@ import ResetCharger from './ResetCharger';
 import ResetChargerAuthKey from './ResetChargerAuthKey';
 import DeleteCharger from './DeleteCharger';
 import CableIcon from '@mui/icons-material/Cable';
+import FirmwareUpgradeCharger from './FirmwareUpgradeCharger';
 
 
 interface ChargerTableProps {
@@ -141,9 +142,30 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
       hideSortIcons: true,
       disableExport: true,
       renderCell: (params) => {
-        if (userType == 'Admin')
+        if (userType == 'Admin' && params.row.network_connected)
           return (
             <ResetCharger 
+              api={api} 
+              charger_id={params.row.charger_id} 
+              charger_alias={params.row.alias} 
+              snack={snack}
+            />
+          );
+        else 
+          return (<></>);
+      }, flex: .7
+    },
+    { field: 'upgrade', 
+      headerName: 'Upgrade',
+      description: 'Upgrade Charger Firmware',
+      sortable: false,
+      disableColumnMenu: true,
+      hideSortIcons: true,
+      disableExport: true,
+      renderCell: (params) => {
+        if (userType == 'Admin' && params.row.network_connected)
+          return (
+            <FirmwareUpgradeCharger 
               api={api} 
               charger_id={params.row.charger_id} 
               charger_alias={params.row.alias} 
