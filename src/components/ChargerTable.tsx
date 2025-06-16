@@ -9,6 +9,8 @@ import Snackbar from '@mui/material/Snackbar';
 import ResetCharger from './ResetCharger';
 import ResetChargerAuthKey from './ResetChargerAuthKey';
 import DeleteCharger from './DeleteCharger';
+import CableIcon from '@mui/icons-material/Cable';
+
 
 interface ChargerTableProps {
   api: BalanzAPI;
@@ -27,7 +29,8 @@ const BLANKCHARGER: CHARGER = {
   charge_point_model: '',
   charge_point_vendor: '',
   conn_max: 16,
-  firmware_version: ''
+  firmware_version: '',
+  meter_type: ''
 };
 
 const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
@@ -109,6 +112,18 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
     { field: 'no_connectors', headerName: '# Connectors', flex: 1, type: 'number', valueGetter: (_, charger) => {
         return Object.keys(charger["connectors"]).length;
       }
+    },
+    { field: 'network_connected', 
+      headerName: 'Conn',
+      description: 'Network Connection Status',
+      disableColumnMenu: true,
+      hideSortIcons: true,
+      renderCell: (params) => {
+        if (params.row.network_connected)
+          return (<CableIcon sx={{mt: .5}} color="success" />);
+        else
+          return (<CableIcon sx={{mt: .5}} color="warning" />);
+      }, flex: .3,
     },
     { field: 'reset', 
       headerName: 'Reset',
