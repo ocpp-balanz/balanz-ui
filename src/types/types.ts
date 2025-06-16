@@ -85,3 +85,13 @@ export type LOGENTRY = {
   timestamp: string;
   logger: string;
 }
+
+export type FIRMWARE = {
+    firmware_id: string,
+    charge_point_vendor: string,
+    charge_point_model: string,
+    firmware_version: string,
+    meter_type: string,
+    url: string,
+    upgrade_from_versions: string
+}

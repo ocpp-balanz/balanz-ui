@@ -20,7 +20,7 @@ const ResponsiveAppBar: React.FC<ResponsiveAppBarProps> = ({ userType }) => {
     else if (userType !== "Admin")
       setPages(['Status', 'Sessions', 'Statistics', 'Chargers', 'Groups', 'Tags']);
     else
-      setPages(['Status', 'Sessions', 'Statistics', 'Chargers', 'Groups', 'Tags', 'Users', 'Logs']);
+      setPages(['Status', 'Sessions', 'Statistics', 'Chargers', 'Groups', 'Tags', 'Users', 'Firmware', 'Logs']);
 }, [userType]);
 
   return (
