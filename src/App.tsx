@@ -13,6 +13,9 @@ import Status from './pages/Status';
 import Login from './pages/Login';
 import Sessions from './pages/Sessions';
 import Users from './pages/Users';
+import Firmware from './pages/Firmware';
+import Logs from './pages/Logs';
+
 import { CONN_STATE } from './types/types';
 
 import './App.css'
@@ -107,6 +110,8 @@ const App: React.FC<AppProp> = ({ api }) => {
           <Route path="/Tags" element={<Tags api={api} />} />
           <Route path="/Sessions" element={<Sessions api={api} />} />
           <Route path="/Users" element={<Users api={api} />} />
+          <Route path="/Firmware" element={<Firmware api={api} />} />
+          <Route path="/Logs" element={<Logs api={api} />} />
           <Route path="*" element={<Navigate to="/Status" replace />} />
       </Routes>
     </Container>

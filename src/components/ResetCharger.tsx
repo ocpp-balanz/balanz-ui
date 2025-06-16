@@ -37,7 +37,7 @@ const ResetCharger: React.FC<ResetChargerProp> = ({api, charger_id, charger_alia
   }
 
   return (<>
-    <RestartAltIcon onClick={handleClickOpen}></RestartAltIcon>
+    <RestartAltIcon  sx={{mt: .5}} onClick={handleClickOpen}></RestartAltIcon>
     <Dialog open={open}  onClose={handleClose}>
         <DialogTitle>Confirm Charger Reset</DialogTitle>
         <DialogContent>

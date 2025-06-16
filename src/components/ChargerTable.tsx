@@ -9,6 +9,9 @@ import Snackbar from '@mui/material/Snackbar';
 import ResetCharger from './ResetCharger';
 import ResetChargerAuthKey from './ResetChargerAuthKey';
 import DeleteCharger from './DeleteCharger';
+import CableIcon from '@mui/icons-material/Cable';
+import FirmwareUpgradeCharger from './FirmwareUpgradeCharger';
+
 
 interface ChargerTableProps {
   api: BalanzAPI;
@@ -27,7 +30,9 @@ const BLANKCHARGER: CHARGER = {
   charge_point_model: '',
   charge_point_vendor: '',
   conn_max: 16,
-  firmware_version: ''
+  firmware_version: '',
+  meter_type: '',
+  fw_options: []
 };
 
 const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
@@ -91,9 +96,17 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
         console.log("Error getting chargers");
       }
     }
+
     getChargers();
+    
+    const interval = setInterval(() => {
+      getChargers();
+     }, 10000);
+
+    return() => clearInterval(interval)    
   }, 
   [api]);
+
 
   const columns: GridColDef<(typeof chargerData)[number]>[] = [
     { field: 'charger_id', headerName: 'ID', flex: 2, editable: true },
@@ -105,9 +118,22 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
     { field: 'firmware_version', headerName: 'Firmware Version', flex: 3},
     { field: 'charge_point_vendor', headerName: 'Vendor', flex: 1},
     { field: 'charge_point_model', headerName: 'Model', flex: 3},
+    { field: 'meter_type', headerName: 'Type', flex: 1},
     { field: 'no_connectors', headerName: '# Connectors', flex: 1, type: 'number', valueGetter: (_, charger) => {
         return Object.keys(charger["connectors"]).length;
       }
+    },
+    { field: 'network_connected', 
+      headerName: 'Conn',
+      description: 'Network Connection Status',
+      disableColumnMenu: true,
+      hideSortIcons: true,
+      renderCell: (params) => {
+        if (params.row.network_connected)
+          return (<CableIcon sx={{mt: .5}} color="success" />);
+        else
+          return (<CableIcon sx={{mt: .5}} color="warning" />);
+      }, flex: .3,
     },
     { field: 'reset', 
       headerName: 'Reset',
@@ -117,13 +143,35 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
       hideSortIcons: true,
       disableExport: true,
       renderCell: (params) => {
-        if (userType == 'Admin')
+        if (userType == 'Admin' && params.row.network_connected)
           return (
             <ResetCharger 
               api={api} 
               charger_id={params.row.charger_id} 
               charger_alias={params.row.alias} 
               snack={snack}
+            />
+          );
+        else 
+          return (<></>);
+      }, flex: .7
+    },
+    { field: 'update', 
+      headerName: 'Update',
+      description: 'Update Charger Firmware',
+      sortable: false,
+      disableColumnMenu: true,
+      hideSortIcons: true,
+      disableExport: true,
+      renderCell: (params) => {
+        if (userType == 'Admin' && params.row.network_connected && params.row.fw_options.length > 0)
+          return (
+            <FirmwareUpgradeCharger 
+              api={api} 
+              charger_id={params.row.charger_id} 
+              charger_alias={params.row.alias} 
+              snack={snack}
+              fw_options={params.row.fw_options}
             />
           );
         else 

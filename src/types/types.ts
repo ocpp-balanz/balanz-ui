@@ -17,6 +17,11 @@ export type CHARGING_ENTRY = {
   price: number | null;
 }
 
+export type FIRMWARE_OPTION = {
+  firmware_id: string;
+  url: string;
+}
+
 export type CHARGER = {
   charger_id: string;
   alias: string;
@@ -28,8 +33,10 @@ export type CHARGER = {
   charge_box_serial_number: string;
   charge_point_model: string;
   charge_point_vendor: string;
+  meter_type: string;
   conn_max: number;
   firmware_version: string;
+  fw_options: Array<FIRMWARE_OPTION>;
 };
 
 export type PRI_AMP = [number, number];
@@ -78,3 +85,19 @@ export type USER = {
   description: string;
 };
 
+export type LOGENTRY = {
+  level: string;
+  message: string;
+  timestamp: string;
+  logger: string;
+}
+
+export type FIRMWARE = {
+    firmware_id: string,
+    charge_point_vendor: string,
+    charge_point_model: string,
+    firmware_version: string,
+    meter_type: string,
+    url: string,
+    upgrade_from_versions: string
+}
