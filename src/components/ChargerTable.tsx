@@ -110,15 +110,15 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
 
   const columns: GridColDef<(typeof chargerData)[number]>[] = [
     { field: 'charger_id', headerName: 'ID', flex: 2, editable: true },
-    { field: 'alias', headerName: 'Alias', flex: 2, editable: true },
+    { field: 'alias', headerName: 'Alias', flex: 1, editable: true },
     { field: 'group_id', headerName: 'Group', flex: 1, editable: true },
-    { field: 'description', headerName: 'Description', flex: 3, editable: true},
+    { field: 'description', headerName: 'Description', flex: 2, editable: true},
     { field: 'priority', headerName: 'Priority', type: 'number', flex: 1, editable: true},
-    { field: 'conn_max', headerName: 'Max A', type: 'number', flex: 1, editable: true},
+    { field: 'conn_max', headerName: 'Max A', type: 'number', flex: .7, editable: true},
     { field: 'firmware_version', headerName: 'Firmware Version', flex: 3},
     { field: 'charge_point_vendor', headerName: 'Vendor', flex: 1},
     { field: 'charge_point_model', headerName: 'Model', flex: 3},
-    { field: 'meter_type', headerName: 'Type', flex: 1},
+    { field: 'meter_type', headerName: 'Type', flex: .5},
     { field: 'no_connectors', headerName: '# Connectors', flex: 1, type: 'number', valueGetter: (_, charger) => {
         return Object.keys(charger["connectors"]).length;
       }
@@ -129,10 +129,14 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
       disableColumnMenu: true,
       hideSortIcons: true,
       renderCell: (params) => {
-        if (params.row.network_connected)
-          return (<CableIcon sx={{mt: .5}} color="success" />);
-        else
-          return (<CableIcon sx={{mt: .5}} color="warning" />);
+        if (params.row.charger_id == BLANKCHARGER.charger_id)
+          return <div></div>
+        else {
+          if (params.row.network_connected)
+            return (<CableIcon sx={{mt: .5}} color="success" />);
+          else
+            return (<CableIcon sx={{mt: .5}} color="warning" />);
+        }
       }, flex: .3,
     },
     { field: 'reset', 
@@ -181,7 +185,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
     { field: 'delete', 
       headerName: 'Delete', 
       description: 'Delete Charger', 
-      flex: 1,
+      flex: .7,
       sortable: false,
       disableColumnMenu: true, 
       hideSortIcons: true,
