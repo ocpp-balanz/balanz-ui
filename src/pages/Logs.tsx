@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import {
-  TextField, Select, MenuItem, Button, Grid, Paper, InputLabel, FormControl,
+  TextField, Select, MenuItem, Button, Grid2, Paper, InputLabel, FormControl,
   Box
 } from '@mui/material';
 import dayjs from 'dayjs';
@@ -61,8 +61,8 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Container maxWidth={false} disableGutters sx={{ fontSize: '.8rem' }}>
             <Paper sx={{ padding: 2, marginBottom: 2, p: 2}}>
-              <Grid container spacing={2}>
-                <Grid sx={{ width: '10%'}}>
+              <Grid2 container spacing={2}>
+                <Grid2 sx={{ width: '10%'}}>
                   <FormControl fullWidth>
                     <InputLabel id="logger-label">Log Type</InputLabel>
                     <Select
@@ -80,16 +80,17 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
                       <MenuItem value="ALL">All</MenuItem>
                       <MenuItem value="AUDIT">Audit</MenuItem>
                     </Select>
-                  </FormControl>                </Grid>
-                <Grid sx={{ width: '30%'}}>
+                  </FormControl>                
+                </Grid2>
+                <Grid2 sx={{ width: '30%'}}>
                   <TextField
                     label="Message Search"
                     fullWidth
                     value={filters.messageSearch}
                     onChange={handleChange('messageSearch')}
                   />
-                </Grid>
-                <Grid>
+                </Grid2>
+                <Grid2>
                   <DateTimePicker
                     label="Start Time"
                     value={filters.timeStampStart ? dayjs(filters.timeStampStart) : null}
@@ -103,8 +104,9 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
                     slotProps={{
                       textField: { fullWidth: true }
                     }}
-                  />                </Grid>
-                <Grid>
+                  />                
+                </Grid2>
+                <Grid2>
                   <DateTimePicker
                     label="End Time"
                     value={filters.timeStampEnd ? dayjs(filters.timeStampEnd) : null}
@@ -119,15 +121,15 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
                       textField: { fullWidth: true }
                     }}
                   />                
-                </Grid>
-                <Grid sx={{ display: 'flex', justifyContent: 'center' }}>
+                </Grid2>
+                <Grid2 sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Button variant="contained" onClick={getLogs}>
                     Get Logs
                   </Button>
-                </Grid>
-              </Grid>
+                </Grid2>
+              </Grid2>
             </Paper>
-          <Box sx={{ display: 'flex', flexDirection: 'column', height: '800px' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '700px' }}>
             <LogDisplay logs={logs} />
           </Box>
         </Container>
