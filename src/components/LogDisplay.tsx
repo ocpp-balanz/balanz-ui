@@ -30,6 +30,14 @@ export default function LogViewer({
     };
   }, []);
 
+  // Auto-scroll to bottom when logs change
+  useEffect(() => {
+    const main = mainScrollRef.current;
+    if (main) {
+      main.scrollTop = main.scrollHeight;
+    }
+  }, [logs]);
+
   // Longest line for sizing top scrollbar
   const longestLine = logs.reduce((longest, log) => {
     const line = `${log.timestamp} ${log.level} ${log.logger}: ${log.message}`;
