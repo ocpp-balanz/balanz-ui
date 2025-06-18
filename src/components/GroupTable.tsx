@@ -85,6 +85,7 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
         rows={groupData}
         density="compact"
         slots={{ toolbar: CustomToolbar }}
+        showToolbar
         // @ts-expect-error Much easier this way
         columns={columns}
         sx={{fontSize: '.8rem'}}

@@ -132,6 +132,7 @@ const UserTable: React.FC<UserTableProps> = ({api}) => {
         rows={userData}
         density="compact"
         slots={{ toolbar: CustomToolbar }}
+        showToolbar
         // @ts-expect-error Much easier this way
         columns={columns}
         sx={{fontSize: '.8rem'}}

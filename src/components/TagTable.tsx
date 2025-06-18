@@ -138,6 +138,7 @@ const TagTable: React.FC<TagTableProps> = ({api}) => {
         rows={tagData}
         density="compact"
         slots={{ toolbar: CustomToolbar }}
+        showToolbar
         // @ts-expect-error Much easier this way
         columns={columns}
         sx={{fontSize: '.8rem'}}

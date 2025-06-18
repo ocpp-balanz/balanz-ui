@@ -128,6 +128,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
       description: 'Network Connection Status',
       disableColumnMenu: true,
       hideSortIcons: true,
+      disableExport: true,
       renderCell: (params) => {
         if (params.row.charger_id == BLANKCHARGER.charger_id)
           return <div></div>
@@ -242,6 +243,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
           rows={chargerData}
           density="compact"
           slots={{ toolbar: CustomToolbar }}
+          showToolbar
           // @ts-expect-error Much easier this way
           columns={columns}
           sx={{fontSize: '.8rem'}}
