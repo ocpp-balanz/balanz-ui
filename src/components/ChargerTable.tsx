@@ -169,7 +169,9 @@ const ChargerTable: React.FC<ChargerTableProps> = ({api, userType}) => {
       hideSortIcons: true,
       disableExport: true,
       renderCell: (params) => {
-        if (userType == 'Admin' && params.row.network_connected && params.row.fw_options.length > 0)
+        // Check if all connectors are in status 'Available'
+        const allConnectorsAvailable = Object.values(params.row.connectors).every(connector => connector.status === 'Available');
+        if (userType == 'Admin' && params.row.network_connected && params.row.fw_options.length > 0 && allConnectorsAvailable)
           return (
             <FirmwareUpgradeCharger 
               api={api} 
