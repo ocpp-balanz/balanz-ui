@@ -1,8 +1,8 @@
 export enum CONN_STATE {
   NOT_CONNECTED,
   CONNECTED,
-  LOGGED_IN
-};
+  LOGGED_IN,
+}
 
 export type CONNECTOR = {
   state: string;
@@ -14,13 +14,15 @@ export type CHARGING_ENTRY = {
   usage: number | null;
   date: Date | null;
   wh: number | null;
+  spot_price: number | null;
+  tariff_price: number | null;
   price: number | null;
-}
+};
 
 export type FIRMWARE_OPTION = {
   firmware_id: string;
   url: string;
-}
+};
 
 export type CHARGER = {
   charger_id: string;
@@ -76,6 +78,8 @@ export type SESSION = {
   kwh: string;
   charging_history: Array<CHARGING_ENTRY>;
   hourly_history: Array<CHARGING_ENTRY>;
+  tariff_price: number;
+  spot_price: number;
   price: number;
 };
 
@@ -90,14 +94,14 @@ export type LOGENTRY = {
   message: string;
   timestamp: string;
   logger: string;
-}
+};
 
 export type FIRMWARE = {
-    firmware_id: string,
-    charge_point_vendor: string,
-    charge_point_model: string,
-    firmware_version: string,
-    meter_type: string,
-    url: string,
-    upgrade_from_versions: string
-}
+  firmware_id: string;
+  charge_point_vendor: string;
+  charge_point_model: string;
+  firmware_version: string;
+  meter_type: string;
+  url: string;
+  upgrade_from_versions: string;
+};
