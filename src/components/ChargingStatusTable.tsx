@@ -295,7 +295,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({group, charger
               */}
               <Stack sx={{ display: { xs: 'none', md: 'block' }}}>
                 <Stack>
-                  <Stack direction="row" alignItems="center" gap={1} useFlexGap>
+                  <Stack direction="row" alignItems="center" gap={1} useFlexGap width='50px'>
                     <ElectricalServicesIcon color='info' sx={{ scale: '1' }}/> {connectorData.length} 
                   </Stack>
                   Total
