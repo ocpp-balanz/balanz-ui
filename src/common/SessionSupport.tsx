@@ -83,6 +83,8 @@ export function augment_session_data(sessionData: Array<SESSION>) {
         date: date.toDate(),
         wh: 0,
         price: 0,
+        tariff_price: 0,
+        spot_price: 0
       });
 
     // Iterate charging entries and put into the right hour_entry

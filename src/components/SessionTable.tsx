@@ -201,7 +201,6 @@ const SessionTable: React.FC<SessionTableProps> = ({
         density="compact"
         sx={{ fontSize: ".8rem", width: "100%" }}
         slots={{ toolbar: CustomToolbar }}
-        showToolbar
         initialState={{
           sorting: {
             sortModel: [{ field: "start_time", sort: "desc" }],

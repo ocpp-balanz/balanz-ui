@@ -119,6 +119,8 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({
         usage: last_usage,
         wh: 0,
         price: 0,
+        tariff_price: 0,
+        spot_price: 0
       });
     }
     return history;
