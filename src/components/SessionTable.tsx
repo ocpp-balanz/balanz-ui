@@ -13,7 +13,7 @@ import { format_time } from "../common/utils";
 import { Button, Stack, Box } from "@mui/material";
 import BalanzAPI from "../services/balanz_api";
 import { augment_session_data } from "../common/SessionSupport";
-import { price_session_data, price_currency } from "../common/EPricing";
+import { price_session_data, price_currency, tariff_tooltip, spot_tooltip } from "../common/EPricing";
 
 const TARIFF_HEADER = "Tariff (" + price_currency() + ")";
 const SPOT_HEADER = "Spot (" + price_currency() + ")";
@@ -107,6 +107,7 @@ const SessionTable: React.FC<SessionTableProps> = ({
     {
       field: "tariff_price",
       headerName: TARIFF_HEADER,
+      description: tariff_tooltip(),
       flex: 1,
       type: "number",
       valueGetter: (value: number) => {
@@ -118,6 +119,7 @@ const SessionTable: React.FC<SessionTableProps> = ({
     {
       field: "spot_price",
       headerName: SPOT_HEADER,
+      description: spot_tooltip(),
       flex: 1,
       type: "number",
       valueGetter: (value: number) => {
