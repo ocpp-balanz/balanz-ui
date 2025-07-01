@@ -1,5 +1,5 @@
-import { Box } from '@mui/material';
-import { useEffect, useRef } from 'react';
+import { Box } from "@mui/material";
+import { useEffect, useRef } from "react";
 
 export default function LogViewer({
   logs,
@@ -22,11 +22,11 @@ export default function LogViewer({
       if (top.scrollLeft !== main.scrollLeft) top.scrollLeft = main.scrollLeft;
     };
 
-    top.addEventListener('scroll', syncMainToTop);
-    main.addEventListener('scroll', syncTopToMain);
+    top.addEventListener("scroll", syncMainToTop);
+    main.addEventListener("scroll", syncTopToMain);
     return () => {
-      top.removeEventListener('scroll', syncMainToTop);
-      main.removeEventListener('scroll', syncTopToMain);
+      top.removeEventListener("scroll", syncMainToTop);
+      main.removeEventListener("scroll", syncTopToMain);
     };
   }, []);
 
@@ -42,47 +42,47 @@ export default function LogViewer({
   const longestLine = logs.reduce((longest, log) => {
     const line = `${log.timestamp} ${log.level} ${log.logger}: ${log.message}`;
     return line.length > longest.length ? line : longest;
-  }, '');
+  }, "");
 
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
+        display: "flex",
+        flexDirection: "column",
         flex: 1,
         minHeight: 0, // allow flex children to shrink
-        fontFamily: 'monospace',
-        border: '1px solid #ccc',
-        backgroundColor: '#fafafa',
-        overflow: 'hidden', // prevent parent scroll
+        fontFamily: "monospace",
+        border: "1px solid #ccc",
+        backgroundColor: "#fafafa",
+        overflow: "hidden", // prevent parent scroll
       }}
     >
       {/* Sticky top scrollbar */}
       <Box
         sx={{
-          position: 'sticky',
+          position: "sticky",
           top: 0,
           zIndex: 2,
-          backgroundColor: '#fafafa',
-          borderBottom: '1px solid #ccc',
-          overflow: 'hidden', // remove vertical scroll here
+          backgroundColor: "#fafafa",
+          borderBottom: "1px solid #ccc",
+          overflow: "hidden", // remove vertical scroll here
         }}
       >
         <Box
           ref={topScrollRef}
           sx={{
-            overflowX: 'auto',
-            overflowY: 'hidden',
+            overflowX: "auto",
+            overflowY: "hidden",
             height: 16,
-            width: '100%',
+            width: "100%",
           }}
         >
           <Box
             sx={{
-              width: 'max-content',
+              width: "max-content",
               height: 1,
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
             }}
           >
             {longestLine}
@@ -95,22 +95,22 @@ export default function LogViewer({
         ref={mainScrollRef}
         sx={{
           flex: 1,
-          overflow: 'auto', // Only this container scrolls vertically
+          overflow: "auto", // Only this container scrolls vertically
         }}
       >
         <Box
           sx={{
-            display: 'inline-block',
-            minWidth: '100%',
+            display: "inline-block",
+            minWidth: "100%",
           }}
         >
           {logs.map((log, i) => (
             <Box
               key={i}
               sx={{
-                textAlign: 'left',
+                textAlign: "left",
                 py: 0.1,
-                whiteSpace: 'nowrap',
+                whiteSpace: "nowrap",
               }}
             >
               {`${log.timestamp} ${log.level} ${log.logger}: ${log.message}`}

@@ -1,17 +1,24 @@
-import * as React from 'react';
-import { GROUP } from '../types/types';
-import { useEffect, useState } from 'react';
-import Box from '@mui/material/Box';
-import BalanzAPI from '../services/balanz_api';
-import Stack from '@mui/material/Stack';
-import Snackbar from '@mui/material/Snackbar';
-import { DataGrid, GridColDef, GridRowId, GridRowModel, GridToolbarContainer, GridToolbarExport} from '@mui/x-data-grid';
+import * as React from "react";
+import { GROUP } from "../types/types";
+import { useEffect, useState } from "react";
+import Box from "@mui/material/Box";
+import BalanzAPI from "../services/balanz_api";
+import Stack from "@mui/material/Stack";
+import Snackbar from "@mui/material/Snackbar";
+import {
+  DataGrid,
+  GridColDef,
+  GridRowId,
+  GridRowModel,
+  GridToolbarContainer,
+  GridToolbarExport,
+} from "@mui/x-data-grid";
 
 interface GroupTableProps {
   api: BalanzAPI;
-};
+}
 
-const GroupTable: React.FC<GroupTableProps> = ({api}) => {
+const GroupTable: React.FC<GroupTableProps> = ({ api }) => {
   const [groupData, setGroupData] = useState<Array<GROUP>>([]);
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
@@ -21,25 +28,26 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
     setOpen(true);
   };
 
-  const handleClose = () => {setOpen(false)};
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   // Get groups
   useEffect(() => {
-    const getGroups = async() => {
+    const getGroups = async () => {
       const [ok, payload] = await api.call("GetGroups", {});
       if (ok == 3) {
         setGroupData(payload);
       } else {
         console.log("Error getting groups");
       }
-    }
+    };
     getGroups();
-  }, 
-  [api]);
+  }, [api]);
 
   const processRowUpdate = React.useCallback(
     async (updatedRow: GridRowModel, originalRow: GridRowModel) => {
-      const payload = {"group_id": updatedRow.group_id}
+      const payload = { group_id: updatedRow.group_id };
       for (const [key, value] of Object.entries(updatedRow)) {
         if (value != originalRow[key]) {
           // @ts-expect-error Much easier this way
@@ -47,7 +55,7 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
         }
       }
 
-      const [ok,] = await api.call("UpdateGroup", payload);
+      const [ok] = await api.call("UpdateGroup", payload);
       if (ok == 3) {
         snack("Succesfully updated group");
         return updatedRow;
@@ -56,28 +64,39 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
         snack("Error updating group");
         return originalRow;
       }
-    }, [api]
+    },
+    [api],
   );
 
   const columns: GridColDef<(typeof groupData)[number]>[] = [
-    { field: 'group_id', headerName: 'ID', flex: 1 },
-    { field: 'description', headerName: 'Description', flex: 3, editable: true},
-    { field: 'max_allocation', headerName: 'Maximum Allocation', flex: 4, editable: true},
+    { field: "group_id", headerName: "ID", flex: 1 },
+    {
+      field: "description",
+      headerName: "Description",
+      flex: 3,
+      editable: true,
+    },
+    {
+      field: "max_allocation",
+      headerName: "Maximum Allocation",
+      flex: 4,
+      editable: true,
+    },
   ];
 
   function getRowId(group: GridRowModel): GridRowId {
     return group.group_id;
-  };
+  }
 
   function CustomToolbar() {
     return (
       <GridToolbarContainer>
         <Box sx={{ flexGrow: 1 }} />
-        <GridToolbarExport/>
+        <GridToolbarExport />
       </GridToolbarContainer>
     );
   }
-  
+
   return (
     <Stack>
       <DataGrid
@@ -88,7 +107,7 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
         showToolbar
         // @ts-expect-error Much easier this way
         columns={columns}
-        sx={{fontSize: '.8rem'}}
+        sx={{ fontSize: ".8rem" }}
         processRowUpdate={processRowUpdate}
       />
       <Snackbar
@@ -96,7 +115,7 @@ const GroupTable: React.FC<GroupTableProps> = ({api}) => {
         autoHideDuration={4000}
         onClose={handleClose}
         message={message}
-      />  
+      />
     </Stack>
   );
 };
