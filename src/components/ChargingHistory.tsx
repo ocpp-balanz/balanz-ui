@@ -13,19 +13,53 @@ export interface ChargingHistoryProp {
 export default function ChargingHistory(props: ChargingHistoryProp) {
   const [open, setOpen] = useState<boolean>(false);
   const { headline, history } = props;
+  const [isSession, setIsSession] = useState<boolean>(false);
 
     // Augment history by summing up wh into kWh
   useEffect(() => {
-    let wh_total = 0.0;
-    for (let i = 0; i < history.length; i++) {
-      history[i].kwh_total = wh_total / 1000.0;
-      wh_total += history[i].wh??0;
+    if (history.length == 0 || history[history.length - 1].kwh_total == 0) {
+      setIsSession(false);
+    } else {
+      let wh_total = 0.0;
+      for (let i = 0; i < history.length; i++) {
+        history[i].kwh_total = wh_total / 1000.0;
+        wh_total += history[i].wh??0;
+      }
+      setIsSession(true);
     }
-  }, [history]);
+  }, [history, isSession]);
 
   const openClose = () => {
     setOpen(!open);
   };
+
+  let yAxis = [{ id: "currentAxis", label: "A", position: "left", min: 0}];
+  if (isSession)
+    yAxis.push({ id: "energyAxis", label: "kWh", position: "right", min: 0});
+  let series = [
+            {
+              yAxisId: "currentAxis",
+              dataKey: "offered",
+              curve: "stepAfter",
+              label: "Charge offered",
+              connectNulls: true,
+            },
+            {
+              yAxisId: "currentAxis",
+              dataKey: "usage",
+              curve: "stepAfter",
+              label: "Usage",
+              connectNulls: true,
+            }];
+  if (isSession) {
+    series.push({
+              yAxisId: "energyAxis",
+              dataKey: "kwh_total",
+              curve: "linear",
+              label: "Energy",
+              connectNulls: false,
+            });
+          }
 
   return (
     <>
@@ -46,32 +80,10 @@ export default function ChargingHistory(props: ChargingHistoryProp) {
                 }),
             },
           ]}
-          yAxis={[
-            { id: "currentAxis", label: "A", position: "left", min: 0 },
-            { id: "energyAxis", label: "kWh", position: "right", min: 0}
-          ]}
-          series={[
-            {
-              yAxisId: "currentAxis",
-              dataKey: "offered",
-              curve: "stepAfter",
-              label: "Charge offered",
-              connectNulls: true,
-            },
-            {
-              yAxisId: "currentAxis",
-              dataKey: "usage",
-              curve: "stepAfter",
-              label: "Usage",
-              connectNulls: true,
-            },
-            {
-              yAxisId: "energyAxis",
-              dataKey: "kwh_total",
-              curve: "linear",
-              label: "Energy",
-            },
-          ]}
+          // @ts-expect-error
+          yAxis={yAxis}
+          // @ts-expect-error
+          series={series}
           height={600}
           width={1000}
         />
