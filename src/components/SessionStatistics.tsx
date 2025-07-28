@@ -211,6 +211,9 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
 
   // Recalc total
   useEffect(() => {
+    if (!sessionAugmented) 
+      return;
+
     let sum = 0;
     let sum_price = 0;
     let sum_spot_price = 0;
@@ -233,19 +236,23 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
         price: sum_price,
       },
     ]);
-  }, [dataset]);
+  }, [dataset, sessionAugmented]);
 
-  // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
-  // a net Wh usage value will be added.
   useEffect(() => {
+    // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
+    // a net Wh usage value will be added.
     augment_session_data(sessionData);
+
+    // Then data will be further augmented with pricing data
     price_session_data(sessionData, chargerData);
+
     setSessionAugmented(true);
-  }, [sessionData, sessionAugmented]);
+  }, [sessionData, chargerData, sessionAugmented]);
 
   // Transform sessionData to required graph dataset
   useEffect(() => {
-    if (!sessionAugmented || startDate == null) return;
+    if (!sessionAugmented || startDate == null) 
+      return;
 
     // Basic algorithm is to first create a number of time interval "buckets" based on the period setting.
     // Then next step is to distribute the charging entry wh values into those buckets (assuming of course
