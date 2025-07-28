@@ -57,36 +57,22 @@ export default function LogViewer({
         overflow: "hidden", // prevent parent scroll
       }}
     >
-      {/* Sticky top scrollbar */}
       <Box
+        ref={topScrollRef}
         sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 2,
-          backgroundColor: "#fafafa",
-          borderBottom: "1px solid #ccc",
-          overflow: "hidden", // remove vertical scroll here
+          overflowX: "auto",
+          overflowY: "hidden",
+          width: "100%",
         }}
       >
         <Box
-          ref={topScrollRef}
           sx={{
-            overflowX: "auto",
-            overflowY: "hidden",
-            height: 16,
-            width: "100%",
+            width: "max-content",
+            height: 1,
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
           }}
         >
-          <Box
-            sx={{
-              width: "max-content",
-              height: 1,
-              pointerEvents: "none",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {longestLine}
-          </Box>
         </Box>
       </Box>
 
