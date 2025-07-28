@@ -367,12 +367,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   }, [period, group, charger, sessionData, sessionAugmented, startDate]);
 
   // Setup right axis stuff
-  let yAxis = [{ id: "energyAxis", scaleType: "linear", label: "kWh" }];
+  let yAxis = [{ id: "energyAxis", scaleType: "linear", label: "kWh", position: 'left' }];
   if (showRight)
     yAxis.push({
       id: "priceAxis",
       scaleType: "linear",
       label: price_currency(),
+      position: 'right'
     });
   let series = [
     { dataKey: "energy", label: "Energy (kWh)", yAxisId: "energyAxis" },
