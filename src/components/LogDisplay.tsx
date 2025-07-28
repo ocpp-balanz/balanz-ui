@@ -38,12 +38,6 @@ export default function LogViewer({
     }
   }, [logs]);
 
-  // Longest line for sizing top scrollbar
-  const longestLine = logs.reduce((longest, log) => {
-    const line = `${log.timestamp} ${log.level} ${log.logger}: ${log.message}`;
-    return line.length > longest.length ? line : longest;
-  }, "");
-
   return (
     <Box
       sx={{
