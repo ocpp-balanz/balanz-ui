@@ -84,7 +84,8 @@ export function augment_session_data(sessionData: Array<SESSION>) {
         wh: 0,
         price: 0,
         tariff_price: 0,
-        spot_price: 0
+        spot_price: 0,
+        kwh_total: null,
       });
 
     // Iterate charging entries and put into the right hour_entry
@@ -122,6 +123,7 @@ export function augment_session_data(sessionData: Array<SESSION>) {
           // @ts-expect-error
           hour_entries[hour_index].wh += contrib_wh;
         remain -= contrib_wh;
+
       }
       if (remain > 1)
         console.log(
@@ -139,6 +141,13 @@ export function augment_session_data(sessionData: Array<SESSION>) {
       //console.log("Adjusting data for session", sessionData[i].session_id, "missed to distribute energy", sessionData[i].energy_meter);
       const diff = sessionData[i].energy_meter - total_check;
       hour_entries[0].wh = (hour_entries[0].wh ?? 0) + diff;
+    }
+
+    // Separate loop for kwh_total
+    let kwh_total = 0.0;
+    for (let hour_index = 0; hour_index < hour_entries.length; hour_index++) {
+      kwh_total += hour_entries[hour_index].wh??0 / 1000.0;
+      hour_entries[hour_index].kwh_total = kwh_total;
     }
 
     // Now, let's add all entries to the session object.

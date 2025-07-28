@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
@@ -13,6 +13,15 @@ export interface ChargingHistoryProp {
 export default function ChargingHistory(props: ChargingHistoryProp) {
   const [open, setOpen] = useState<boolean>(false);
   const { headline, history } = props;
+
+    // Augment history by summing up wh into kWh
+  useEffect(() => {
+    let wh_total = 0.0;
+    for (let i = 0; i < history.length; i++) {
+      history[i].kwh_total = wh_total / 1000.0;
+      wh_total += history[i].wh??0;
+    }
+  }, [history]);
 
   const openClose = () => {
     setOpen(!open);
@@ -37,19 +46,30 @@ export default function ChargingHistory(props: ChargingHistoryProp) {
                 }),
             },
           ]}
-          yAxis={[{ min: 0 }]}
+          yAxis={[
+            { id: "currentAxis", label: "A", position: "left", min: 0 },
+            { id: "energyAxis", label: "kWh", position: "right", min: 0}
+          ]}
           series={[
             {
+              yAxisId: "currentAxis",
               dataKey: "offered",
               curve: "stepAfter",
-              label: "Charge offered (A)",
+              label: "Charge offered",
               connectNulls: true,
             },
             {
+              yAxisId: "currentAxis",
               dataKey: "usage",
               curve: "stepAfter",
-              label: "Usage (A)",
+              label: "Usage",
               connectNulls: true,
+            },
+            {
+              yAxisId: "energyAxis",
+              dataKey: "kwh_total",
+              curve: "linear",
+              label: "Energy",
             },
           ]}
           height={600}

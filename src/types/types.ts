@@ -17,6 +17,7 @@ export type CHARGING_ENTRY = {
   spot_price: number | null;
   tariff_price: number | null;
   price: number | null;
+  kwh_total: number | null;
 };
 
 export type FIRMWARE_OPTION = {
