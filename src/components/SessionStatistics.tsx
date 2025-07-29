@@ -20,6 +20,8 @@ import dayjs, { Dayjs } from "dayjs";
 import { augment_session_data } from "../common/SessionSupport";
 import { price_session_data, price_currency } from "../common/EPricing";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
+import ClearIcon from '@mui/icons-material/Clear';
+import { IconButton } from "@mui/material";
 
 const TARIFF_HEADER = "Tariff (" + price_currency() + ")";
 const SPOT_HEADER = "Spot (" + price_currency() + ")";
@@ -99,6 +101,10 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
 
   const handleChargerChange = (event: SelectChangeEvent) => {
     setCharger(event.target.value as string);
+  };
+
+  const handleClear = () => {
+    setGroup([]);
   };
 
   let columns: GridColDef<DATAENTRY>[] = [
@@ -467,6 +473,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
               </MenuItem>
             ))}
           </Select>
+        <IconButton onClick={handleClear} size="small"><ClearIcon/></IconButton>
         </FormControl>
         <FormControl sx={{ m: 1, minWidth: 100 }}>
           <InputLabel id="select-charger">Charger</InputLabel>
