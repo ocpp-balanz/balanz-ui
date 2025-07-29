@@ -63,7 +63,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   chargerData,
 }) => {
   const [period, setPeriod] = useState<string>("last48hours");
-  const [group, setGroup] = useState<string>("(all)");
+  const [group, setGroup] = useState<Array<string>>(groupData.map((g) => g.group_id));
   const [showRight, setShowRight] = useState<boolean>(false);
   const [charger, setCharger] = useState<string>("(all)");
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
@@ -86,8 +86,14 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
     setShowRight((event.target.value as string) === "true");
   };
 
-  const handleGroupChange = (event: SelectChangeEvent) => {
-    setGroup(event.target.value as string);
+  const handleGroupChange = (event: SelectChangeEvent<typeof group>) =>  {
+    const {
+      target: { value },
+    } = event;
+    setGroup(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
     setCharger("(all)");
   };
 
@@ -211,9 +217,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
 
   // Recalc total
   useEffect(() => {
-    if (!sessionAugmented) 
-      return;
-
     let sum = 0;
     let sum_price = 0;
     let sum_spot_price = 0;
@@ -236,23 +239,19 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
         price: sum_price,
       },
     ]);
-  }, [dataset, sessionAugmented]);
+  }, [dataset]);
 
+  // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
+  // a net Wh usage value will be added.
   useEffect(() => {
-    // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
-    // a net Wh usage value will be added.
     augment_session_data(sessionData);
-
-    // Then data will be further augmented with pricing data
     price_session_data(sessionData, chargerData);
-
     setSessionAugmented(true);
-  }, [sessionData, chargerData, sessionAugmented]);
+  }, [sessionData, sessionAugmented]);
 
   // Transform sessionData to required graph dataset
   useEffect(() => {
-    if (!sessionAugmented || startDate == null) 
-      return;
+    if (!sessionAugmented || startDate == null) return;
 
     // Basic algorithm is to first create a number of time interval "buckets" based on the period setting.
     // Then next step is to distribute the charging entry wh values into those buckets (assuming of course
@@ -326,7 +325,8 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
     const start_date_sec = startDate.toDate().getTime() / 1000.0;
     const end_date_sec = end_date.toDate().getTime() / 1000.0;
     for (let i = 0; i < sessionData.length; i++) {
-      if (group != "(all)" && group != sessionData[i].group_id) continue;
+      if (!group.includes(sessionData[i].group_id))
+        continue;
 
       if (charger != "(all)" && charger != sessionData[i].charger_id) continue;
 
@@ -439,19 +439,23 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
             }}
           />
         </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 100 }}>
+        <FormControl sx={{ m: 1, minWidth: 250 }}>
           <InputLabel id="select-group">Group</InputLabel>
           <Select
             labelId="select-group"
             id="select-group"
             value={group}
             label="Group"
+            multiple={true}
             onChange={handleGroupChange}
             sx={{ fontSize: ".9rem" }}
+            renderValue={(selected) => {
+              const all_selected = selected.join(', ');
+              if (all_selected.length > 40)
+                return all_selected.substring(0, 40) + "...";
+              return all_selected;
+            }}
           >
-            <MenuItem value={"(all)"} sx={{ fontSize: ".9rem" }}>
-              (all)
-            </MenuItem>
             {groupData.map((group) => (
               <MenuItem
                 key={group.group_id}
@@ -476,9 +480,9 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
             <MenuItem value={"(all)"} sx={{ fontSize: ".9rem" }}>
               (all)
             </MenuItem>
-            {group != "(all)"
+            {group.length === 1
               ? chargerData
-                  .filter((c) => c.group_id == group)
+                  .filter((c) => c.group_id == group[0])
                   .map((ch) => (
                     <MenuItem
                       key={ch.charger_id}
