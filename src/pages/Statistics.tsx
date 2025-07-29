@@ -59,7 +59,7 @@ const Statistics: React.FC<StatisticsProp> = ({ api }) => {
     };
     getChargers();
   }, [api]);
-  return (
+  return groupData.length == 0? <div>Loading .... </div> : (
     <Box sx={{ mt: 2 }}>
       <SessionStatistics
         groupData={groupData}
