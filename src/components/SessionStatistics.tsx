@@ -385,7 +385,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   }, [period, group, charger, sessionData, sessionAugmented, startDate]);
 
   // Setup right axis stuff
-  let yAxis = [{ id: "energyAxis", scaleType: "linear", label: "kWh", position: 'left', min: 0 }];
+  let yAxis = [{ id: "energyAxis", scaleType: "linear", label: "kWh", position: 'left', min: 0, min: 0 }];
   if (showRight)
     yAxis.push({
       id: "priceAxis",
@@ -393,16 +393,25 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
       label: price_currency(),
       position: 'right',
       min: 0
+      min: 0,
     });
   let series = [
-    { dataKey: "energy", label: "Energy (kWh)", yAxisId: "energyAxis" },
+    { dataKey: "energy", label: "Energy (kWh)", yAxisId: "energyAxis", stack: "energyStack" },
   ];
-  if (showRight)
+  if (showRight) {
     series.push({
-      dataKey: "price",
-      label: PRICE_HEADER,
+      dataKey: "tariff_price",
+      label: TARIFF_HEADER,
       yAxisId: "priceAxis",
+      stack: "priceStack",
     });
+    series.push({
+      dataKey: "spot_price",
+      label: SPOT_HEADER,
+      yAxisId: "priceAxis",
+      stack: "priceStack",
+    });
+  }
   let rightAxis = null;
   if (showRight) rightAxis = "priceAxis";
 
