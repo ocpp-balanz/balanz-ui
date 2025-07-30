@@ -18,7 +18,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { augment_session_data } from "../common/SessionSupport";
-import { price_session_data, price_currency } from "../common/EPricing";
+import { price_session_data, price_currency, tariff_tooltip, spot_tooltip } from "../common/EPricing";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
 import { IconButton, Stack } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
@@ -130,6 +130,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
       {
         field: "tariff_price",
         headerName: TARIFF_HEADER,
+        description: tariff_tooltip(),
         type: "number",
         valueGetter: (value: number) => {
           return value.toFixed(2);
@@ -153,6 +154,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
       {
         field: "spot_price",
         headerName: SPOT_HEADER,
+        description: spot_tooltip(),
         type: "number",
         valueGetter: (value: number) => {
           return value.toFixed(2);
@@ -385,7 +387,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   }, [period, group, charger, sessionData, sessionAugmented, startDate]);
 
   // Setup right axis stuff
-  let yAxis = [{ id: "energyAxis", scaleType: "linear", label: "kWh", position: 'left', min: 0, min: 0 }];
+  let yAxis = [{ id: "energyAxis", scaleType: "linear", label: "kWh", position: 'left', min: 0}];
   if (showRight)
     yAxis.push({
       id: "priceAxis",
@@ -393,7 +395,6 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
       label: price_currency(),
       position: 'right',
       min: 0
-      min: 0,
     });
   let series = [
     { dataKey: "energy", label: "Energy (kWh)", yAxisId: "energyAxis", stack: "energyStack" },
