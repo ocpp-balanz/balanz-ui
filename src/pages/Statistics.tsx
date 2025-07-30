@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import BalanzAPI from "../services/balanz_api";
 import { GROUP, SESSION, CHARGER } from "../types/types";
 import SessionStatistics from "../components/SessionStatistics";
+import Loader from "../common/Loader";
 
 interface StatisticsProp {
   api: BalanzAPI;
@@ -59,7 +60,7 @@ const Statistics: React.FC<StatisticsProp> = ({ api }) => {
     };
     getChargers();
   }, [api]);
-  return groupData.length == 0? <div>Loading .... </div> : (
+  return groupData.length == 0? <Loader /> : (
     <Box sx={{ mt: 2 }}>
       <SessionStatistics
         groupData={groupData}

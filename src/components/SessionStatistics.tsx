@@ -20,8 +20,9 @@ import dayjs, { Dayjs } from "dayjs";
 import { augment_session_data } from "../common/SessionSupport";
 import { price_session_data, price_currency } from "../common/EPricing";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
+import { IconButton, Stack } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
-import { IconButton } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
 const TARIFF_HEADER = "Tariff (" + price_currency() + ")";
 const SPOT_HEADER = "Spot (" + price_currency() + ")";
@@ -105,6 +106,10 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
 
   const handleClear = () => {
     setGroup([]);
+  };
+
+  const handleAdd = () => {
+    setGroup(groupData.map((g) => g.group_id));
   };
 
   let columns: GridColDef<DATAENTRY>[] = [
@@ -446,7 +451,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
             }}
           />
         </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 250 }}>
+        <FormControl sx={{ my: 1, minWidth: 250 }}>
           <InputLabel id="select-group">Group</InputLabel>
           <Select
             labelId="select-group"
@@ -473,7 +478,12 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
               </MenuItem>
             ))}
           </Select>
-        <IconButton onClick={handleClear} size="small"><ClearIcon/></IconButton>
+        </FormControl>
+        <FormControl sx={{ m: 0 }}>
+        <Stack direction="column" spacing={0}>
+          <IconButton onClick={handleAdd} size="small"><AddIcon/></IconButton>
+          <IconButton onClick={handleClear} size="small"><ClearIcon/></IconButton>
+        </Stack>
         </FormControl>
         <FormControl sx={{ m: 1, minWidth: 100 }}>
           <InputLabel id="select-charger">Charger</InputLabel>
