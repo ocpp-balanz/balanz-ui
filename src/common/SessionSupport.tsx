@@ -1,7 +1,6 @@
 import { SESSION, CHARGING_ENTRY } from "../types/types";
 import dayjs from "dayjs";
 
-
 export function augment_1session(session: SESSION) {
   // First, let's quickly set the date field
   session.charging_history.map((e) => {
@@ -10,10 +9,7 @@ export function augment_1session(session: SESSION) {
 
   // Some entries in sessions may be errored, having end_time ahead of start_time.
   // Hack it dramatically.
-  if (
-    session.end_time != null &&
-    session.end_time <= session.start_time
-  ) {
+  if (session.end_time != null && session.end_time <= session.start_time) {
     session.end_time = session.start_time + 1800; // 30 min
     console.log(
       "WARNING: Session end time is before start time. Setting to " +
@@ -31,12 +27,8 @@ export function augment_1session(session: SESSION) {
     let seconds = 0;
     if (ci == session.charging_history.length - 1) {
       if (session.end_time != null)
-        seconds =
-          session.end_time -
-          session.charging_history[ci].timestamp;
-      else
-        seconds =
-          Date.now() / 1000 - session.charging_history[ci].timestamp;
+        seconds = session.end_time - session.charging_history[ci].timestamp;
+      else seconds = Date.now() / 1000 - session.charging_history[ci].timestamp;
     } else {
       seconds =
         session.charging_history[ci + 1].timestamp -
@@ -44,14 +36,10 @@ export function augment_1session(session: SESSION) {
     }
     if (session.charging_history[ci].usage != null)
       usage = session.charging_history[ci].usage;
-    else if (
-      usage == null &&
-      session.charging_history[ci].offered != null
-    ) {
+    else if (usage == null && session.charging_history[ci].offered != null) {
       usage = session.charging_history[ci].offered;
     }
-    session.charging_history[ci].wh =
-      ((usage ?? 0) * seconds) / 3600.0;
+    session.charging_history[ci].wh = ((usage ?? 0) * seconds) / 3600.0;
     total_wh += session.charging_history[ci].wh ?? 0;
   }
 
@@ -69,9 +57,7 @@ export function augment_1session(session: SESSION) {
   const hour_entries: Array<CHARGING_ENTRY> = [];
   const start_date = dayjs.unix(session.start_time).startOf("hour");
   let end_date =
-    session.end_time == null
-      ? dayjs()
-      : dayjs.unix(session.end_time);
+    session.end_time == null ? dayjs() : dayjs.unix(session.end_time);
   end_date = end_date.add(1, "hour").startOf("hour"); // Ensure final entry extends.
   for (let date = start_date; date <= end_date; date = date.add(1, "hour"))
     hour_entries.push({
@@ -113,22 +99,16 @@ export function augment_1session(session: SESSION) {
 
       // Vs. length? - this determines the relative contribution
       const contrib_wh =
-        (session.charging_history[ci].wh ?? 0) *
-        (overlap_s / (end - start));
+        (session.charging_history[ci].wh ?? 0) * (overlap_s / (end - start));
       if (hour_entries[hour_index].wh == null)
         hour_entries[hour_index].wh = contrib_wh;
       else
         // @ts-expect-error
         hour_entries[hour_index].wh += contrib_wh;
       remain -= contrib_wh;
-
     }
     if (remain > 1)
-      console.log(
-        "Warning, remaining for session",
-        session.session_id,
-        remain,
-      );
+      console.log("Warning, remaining for session", session.session_id, remain);
   }
 
   // First, let's review the totals to make sure they add up. If not, adjust them into first entry.
@@ -144,7 +124,7 @@ export function augment_1session(session: SESSION) {
   // Separate loop for kwh_total
   let kwh_total = 0.0;
   for (let hour_index = 0; hour_index < hour_entries.length; hour_index++) {
-    kwh_total += hour_entries[hour_index].wh??0 / 1000.0;
+    kwh_total += hour_entries[hour_index].wh ?? 0 / 1000.0;
     hour_entries[hour_index].kwh_total = kwh_total;
   }
 

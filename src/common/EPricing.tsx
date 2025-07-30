@@ -166,14 +166,16 @@ export function price_currency(): string {
 }
 
 export function tariff_tooltip(): string {
-  return "Tariffen består af 4 konstante elementer og 1 dynamisk element (alt uden moms):\n" +
+  return (
+    "Tariffen består af 4 konstante elementer og 1 dynamisk element (alt uden moms):\n" +
     "1. Elafgift: 0.72 DKK/kWh\n" +
     "2. Nettarif: 0.061 DKK/kWh\n" +
     "3. Systemtarif: 0.074 DKK/kWh\n" +
     "4. El leverandør grøn strøm: 0.05 DKK/kWh\n" +
     "5. Distributionsafgift (afhænger af tidspunkt og årstid):\n" +
     "   - Vinter: 0.0976 DKK/kWh (00-06), 0.2929 DKK/kWh (06-17 & 21-00), 0.8788 DKK/kWh (17-21)\n" +
-    "   - Sommer: 0.0976 DKK/kWh (00-06), 0.1465 DKK/kWh (06-17 & 21-00), 0.3808 DKK/kWh (17-21)";
+    "   - Sommer: 0.0976 DKK/kWh (00-06), 0.1465 DKK/kWh (06-17 & 21-00), 0.3808 DKK/kWh (17-21)"
+  );
 }
 
 export function spot_tooltip(): string {

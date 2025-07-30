@@ -18,11 +18,16 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { augment_session_data } from "../common/SessionSupport";
-import { price_session_data, price_currency, tariff_tooltip, spot_tooltip } from "../common/EPricing";
+import {
+  price_session_data,
+  price_currency,
+  tariff_tooltip,
+  spot_tooltip,
+} from "../common/EPricing";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
 import { IconButton, Stack } from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import AddIcon from '@mui/icons-material/Add';
+import ClearIcon from "@mui/icons-material/Clear";
+import AddIcon from "@mui/icons-material/Add";
 
 const TARIFF_HEADER = "Tariff (" + price_currency() + ")";
 const SPOT_HEADER = "Spot (" + price_currency() + ")";
@@ -66,7 +71,9 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   chargerData,
 }) => {
   const [period, setPeriod] = useState<string>("last48hours");
-  const [group, setGroup] = useState<Array<string>>(groupData.map((g) => g.group_id));
+  const [group, setGroup] = useState<Array<string>>(
+    groupData.map((g) => g.group_id),
+  );
   const [showRight, setShowRight] = useState<boolean>(false);
   const [charger, setCharger] = useState<string>("(all)");
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
@@ -89,13 +96,13 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
     setShowRight((event.target.value as string) === "true");
   };
 
-  const handleGroupChange = (event: SelectChangeEvent<typeof group>) =>  {
+  const handleGroupChange = (event: SelectChangeEvent<typeof group>) => {
     const {
       target: { value },
     } = event;
     setGroup(
       // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
+      typeof value === "string" ? value.split(",") : value,
     );
     setCharger("(all)");
   };
@@ -338,8 +345,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
     const start_date_sec = startDate.toDate().getTime() / 1000.0;
     const end_date_sec = end_date.toDate().getTime() / 1000.0;
     for (let i = 0; i < sessionData.length; i++) {
-      if (!group.includes(sessionData[i].group_id))
-        continue;
+      if (!group.includes(sessionData[i].group_id)) continue;
 
       if (charger != "(all)" && charger != sessionData[i].charger_id) continue;
 
@@ -387,28 +393,41 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   }, [period, group, charger, sessionData, sessionAugmented, startDate]);
 
   // Setup right axis stuff
-  let yAxis = [{ id: "energyAxis", scaleType: "linear", label: "kWh", position: 'left', min: 0}];
+  let yAxis = [
+    {
+      id: "energyAxis",
+      scaleType: "linear",
+      label: "kWh",
+      position: "left",
+      min: 0,
+    },
+  ];
   if (showRight)
     yAxis.push({
       id: "priceAxis",
       scaleType: "linear",
       label: price_currency(),
-      position: 'right',
-      min: 0
+      position: "right",
+      min: 0,
     });
   let series = [
-    { dataKey: "energy", label: "Energy (kWh)", yAxisId: "energyAxis", stack: "energyStack" },
+    {
+      dataKey: "energy",
+      label: "Energy",
+      yAxisId: "energyAxis",
+      stack: "energyStack",
+    },
   ];
   if (showRight) {
     series.push({
       dataKey: "tariff_price",
-      label: TARIFF_HEADER,
+      label: "Tariff Price",
       yAxisId: "priceAxis",
       stack: "priceStack",
     });
     series.push({
       dataKey: "spot_price",
-      label: SPOT_HEADER,
+      label: "Spot Price",
       yAxisId: "priceAxis",
       stack: "priceStack",
     });
@@ -472,7 +491,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
             onChange={handleGroupChange}
             sx={{ fontSize: ".9rem" }}
             renderValue={(selected) => {
-              const all_selected = selected.join(', ');
+              const all_selected = selected.join(", ");
               if (all_selected.length > 40)
                 return all_selected.substring(0, 40) + "...";
               return all_selected;
@@ -490,10 +509,14 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
           </Select>
         </FormControl>
         <FormControl sx={{ m: 0 }}>
-        <Stack direction="column" spacing={0}>
-          <IconButton onClick={handleAdd} size="small"><AddIcon/></IconButton>
-          <IconButton onClick={handleClear} size="small"><ClearIcon/></IconButton>
-        </Stack>
+          <Stack direction="column" spacing={0}>
+            <IconButton onClick={handleAdd} size="small">
+              <AddIcon />
+            </IconButton>
+            <IconButton onClick={handleClear} size="small">
+              <ClearIcon />
+            </IconButton>
+          </Stack>
         </FormControl>
         <FormControl sx={{ m: 1, minWidth: 100 }}>
           <InputLabel id="select-charger">Charger</InputLabel>

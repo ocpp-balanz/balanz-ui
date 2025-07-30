@@ -66,8 +66,7 @@ export default function LogViewer({
             pointerEvents: "none",
             whiteSpace: "nowrap",
           }}
-        >
-        </Box>
+        ></Box>
       </Box>
 
       {/* Main scrollable log content */}

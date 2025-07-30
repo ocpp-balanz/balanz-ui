@@ -121,7 +121,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({
         price: 0,
         tariff_price: 0,
         spot_price: 0,
-        kwh_total: 0
+        kwh_total: 0,
       });
     }
     return history;
