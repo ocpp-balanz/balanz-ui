@@ -301,7 +301,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
       for (let date = startDate; date <= end_date; date = date.add(1, "hour")) {
         result.push({
           id: date.format("YYYY-MM-DD-HH"),
-          x: date.format("DD") + "\n" + date.format("HH"),
+          x: date.format("DD\nHH"),
           energy: 0,
           timestamp: date.unix(),
           price: 0,
@@ -566,7 +566,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
         </FormControl>
         <BarChart
           dataset={dataset}
-          xAxis={[{ scaleType: "band", dataKey: "x" }]}
+          xAxis={[{ scaleType: "band", dataKey: "x", height: 40}]}
           // @ts-expect-error
           yAxis={yAxis}
           series={series}
