@@ -173,8 +173,14 @@ const SessionTable: React.FC<SessionTableProps> = ({
                 params.row.charger_id +
                 " (" +
                 params.row.charger_alias +
-                "). Start: " +
+                ") for " + 
+                params.row.id_tag + 
+                " (" + 
+                params.row.user_name +
+                ")\nStart: " +
                 format_time(params.row.start_time) +
+                ". End: " +
+                format_time(params.row.end_time) +
                 ". Total: " +
                 params.row.kwh +
                 " kWh"

@@ -66,7 +66,8 @@ export default function ChargingHistory(props: ChargingHistoryProp) {
     <>
       <QueryStatsIcon sx={{ mt: 0.5 }} onClick={openClose}></QueryStatsIcon>
       <Dialog open={open} onClick={openClose} maxWidth={false}>
-        <DialogTitle>{headline}</DialogTitle>
+        {headline.split("\n").map((line, index) => (
+          <DialogTitle key={index} sx={{ py: 0, my: 0, textAlign: "center" }}>{line}</DialogTitle>))}
         <LineChart
           dataset={history}
           xAxis={[
