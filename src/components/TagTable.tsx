@@ -25,7 +25,7 @@ const BLANKTAG: TAG = {
   user_name: "(new user name)",
   parent_id_tag: null,
   description: null,
-  status: "Activated",
+  status: "",
   priority: null,
 };
 
@@ -60,7 +60,7 @@ const TagTable: React.FC<TagTableProps> = ({ api }) => {
 
   const processRowUpdate = React.useCallback(
     async (updatedRow: GridRowModel, originalRow: GridRowModel) => {
-      const payload = { id_tag: updatedRow.id_tag };
+      const payload: Partial<TAG> = { id_tag: updatedRow.id_tag };
       for (const [key, value] of Object.entries(updatedRow)) {
         if (value != originalRow[key]) {
           // @ts-expect-error Much easier this way
@@ -74,6 +74,10 @@ const TagTable: React.FC<TagTableProps> = ({ api }) => {
       }
 
       if (originalRow["id_tag"] == BLANKTAG.id_tag) {
+        if (updatedRow["status"] == "") {
+          payload["status"] = "Activated";
+          updatedRow["status"] = "Activated";
+        }
         const [ok] = await api.call("CreateTag", payload);
         if (ok == 3) {
           snack("Succesfully created tag");
