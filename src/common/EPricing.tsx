@@ -21,8 +21,15 @@ const ZONES = ["DK1", "DK2"];
 const zone_prices = new Map();
 
 function tarif(start_time: Dayjs): number {
+  // Energy tariff. Fixed
+  let energy_tariff = 0.727; // DKK/kwh
+
+  // Temporarily at 0.008 DKK/kwh for 2026 and 2027
+  if (start_time.year() == 2026 || start_time.year() == 2027) 
+    energy_tariff = 0.008;
+
   // Base tariff / kwh
-  const base_tariff = 0.72 + 0.135; // Ex-VAT. .72 = elafgift. .135 = 0.061 nettarif + 0.074 systemtarif
+  const base_tariff = energy_tariff + 0.135; // Ex-VAT.  0.135 = 0.061 nettarif + 0.074 systemtarif
   // https://radiuselnet.dk/elnetkunder/tariffer-og-netabonnement/
   const winter_tariff = [0.0976, 0.2929, 0.8788]; // Winter ex-VAT
   const summer_tariff = [0.0976, 0.1465, 0.3808]; // Summer ex-VAT
@@ -168,7 +175,7 @@ export function price_currency(): string {
 export function tariff_tooltip(): string {
   return (
     "Tariffen består af 4 konstante elementer og 1 dynamisk element (alt uden moms):\n" +
-    "1. Elafgift: 0.72 DKK/kWh\n" +
+    "1. Elafgift: 0.727 DKK/kWh (0.008 DKK/kwh i hele 2026/2027)\n" +
     "2. Nettarif: 0.061 DKK/kWh\n" +
     "3. Systemtarif: 0.074 DKK/kWh\n" +
     "4. El leverandør grøn strøm: 0.05 DKK/kWh\n" +
