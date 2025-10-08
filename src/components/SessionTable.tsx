@@ -48,11 +48,17 @@ const SessionTable: React.FC<SessionTableProps> = ({
 
   // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
   // a net Wh usage value will be added.
-  useEffect(() => {
-    augment_session_data(sessionData);
-    price_session_data(sessionData, chargerData);
-    setSessionAugmented(true);
-  }, [sessionData, sessionAugmented]);
+ useEffect(() => {
+    const augmentData = async () => {
+      augment_session_data(sessionData);
+      await price_session_data(sessionData, chargerData);
+      setSessionAugmented(true);
+    };
+  
+    if (!sessionAugmented) {
+      augmentData();
+    }
+  }, [sessionData, sessionAugmented, chargerData]);
 
   function download_sessions() {
     const getSessionsCSV = async () => {
@@ -116,6 +122,7 @@ const SessionTable: React.FC<SessionTableProps> = ({
       flex: 1,
       type: "number",
       valueGetter: (value: number) => {
+        if (value == null) return (0).toFixed(2);
         return value.toFixed(2);
       },
       disableColumnMenu: true,
@@ -128,6 +135,7 @@ const SessionTable: React.FC<SessionTableProps> = ({
       flex: 1,
       type: "number",
       valueGetter: (value: number) => {
+        if (value == null) return (0).toFixed(2);
         return value.toFixed(2);
       },
       disableColumnMenu: true,
@@ -139,6 +147,7 @@ const SessionTable: React.FC<SessionTableProps> = ({
       flex: 1,
       type: "number",
       valueGetter: (value: number) => {
+        if (value == null) return (0).toFixed(2);
         return value.toFixed(2);
       },
       disableColumnMenu: true,

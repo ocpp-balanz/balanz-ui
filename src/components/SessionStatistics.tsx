@@ -264,10 +264,16 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
   // a net Wh usage value will be added.
   useEffect(() => {
-    augment_session_data(sessionData);
-    price_session_data(sessionData, chargerData);
-    setSessionAugmented(true);
-  }, [sessionData, sessionAugmented]);
+    const augmentData = async () => {
+      augment_session_data(sessionData);
+      await price_session_data(sessionData, chargerData);
+      setSessionAugmented(true);
+    };
+  
+    if (!sessionAugmented) {
+      augmentData();
+    }
+  }, [sessionData, sessionAugmented, chargerData]);
 
   // Transform sessionData to required graph dataset
   useEffect(() => {

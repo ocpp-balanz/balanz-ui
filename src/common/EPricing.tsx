@@ -62,7 +62,7 @@ function total_kwh_price(
   return [spot_price, tariff_price];
 }
 
-function download_prices(start_time: number) {
+async function download_prices(start_time: number): Promise<void> {
   const call_api = async (url: string) => {
     const response = await fetch(url, { mode: "cors" });
     if (response.ok) {
@@ -119,18 +119,16 @@ function download_prices(start_time: number) {
       }
     }
   };
-  (async () => {
-    await date_loop();
-  })();
+  await date_loop();
   console.log("TEST2: " + total_kwh_price());
 }
 
-export function price_session_data(
+export async function price_session_data(
   sessionData: Array<SESSION>,
   chargerData: Array<CHARGER>,
 ) {
   if (sessionData.length == 0) return;
-  download_prices(sessionData[0].start_time);
+  await download_prices(sessionData[0].start_time);
 
   // Let's turn chargerData into a map for quick lookup into description which can hold tariff related info.
   const charger_desc_map = new Map();
