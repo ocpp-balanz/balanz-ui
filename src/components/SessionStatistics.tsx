@@ -25,7 +25,7 @@ import {
   spot_tooltip,
 } from "../common/EPricing";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
-import { IconButton, Stack, TextField, OutlinedInput } from "@mui/material";
+import { IconButton, Stack, TextField } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -592,19 +592,25 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
           value={tagFilter}
           onChange={handleTagFilterChange}
           sx={{ fontSize: ".9rem", m: 1, minWidth: 200 }}
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
         />
         <TextField
           size="small"
           id="tag-user-name-filter"
-          label="Filter by Tag User Name"
+          label="Filter by User Name"
           variant="outlined"
           value={tagUserNameFilter}
           onChange={handleTagUserNameChange}
           sx={{ fontSize: ".9rem", m: 1, minWidth: 200 }}
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
         />
         <BarChart
           dataset={dataset}
-          xAxis={[{ scaleType: "band", dataKey: "x", height: 40}]}
+          xAxis={[{ scaleType: "band", dataKey: "x" }]}
           // @ts-expect-error
           yAxis={yAxis}
           series={series}
