@@ -25,7 +25,7 @@ import {
   spot_tooltip,
 } from "../common/EPricing";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
-import { IconButton, Stack } from "@mui/material";
+import { IconButton, Stack, TextField, OutlinedInput } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -87,6 +87,8 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   const [startDate, setStartDate] = useState<Dayjs | null>(
     dayjs().subtract(48, "hours"),
   );
+  const [tagFilter, setTagFilter] = useState<string>("");
+  const [tagUserNameFilter, setTagUserNameFilter] = useState<string>("");
 
   const handlePeriodChange = (event: SelectChangeEvent) => {
     setPeriod(event.target.value as string);
@@ -117,6 +119,14 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
 
   const handleAdd = () => {
     setGroup(groupData.map((g) => g.group_id));
+  };
+
+  const handleTagFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTagFilter(event.target.value);
+  };
+
+  const handleTagUserNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTagUserNameFilter(event.target.value);
   };
 
   let columns: GridColDef<DATAENTRY>[] = [
@@ -355,6 +365,10 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
 
       if (charger != "(all)" && charger != sessionData[i].charger_id) continue;
 
+      if (tagFilter.length > 0 && sessionData[i].id_tag.toUpperCase() != tagFilter.toUpperCase()) continue; 
+
+      if (tagUserNameFilter.length > 0 && sessionData[i].user_name.toUpperCase() != tagUserNameFilter.toUpperCase()) continue;
+
       // Is the session relevant at all, time-wise? If not, quickly move on...
       if (
         sessionData[i].end_time != null &&
@@ -396,7 +410,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
     if (result.length > 0) result.pop();
 
     setDataset(result);
-  }, [period, group, charger, sessionData, sessionAugmented, startDate]);
+  }, [period, group, charger, sessionData, sessionAugmented, startDate, tagFilter, tagUserNameFilter]);
 
   // Setup right axis stuff
   let yAxis = [
@@ -570,6 +584,24 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
             </MenuItem>
           </Select>
         </FormControl>
+        <TextField
+          size="small"
+          id="tag-filter"
+          label="Filter by Tag"
+          variant="outlined"
+          value={tagFilter}
+          onChange={handleTagFilterChange}
+          sx={{ fontSize: ".9rem", m: 1, minWidth: 200 }}
+        />
+        <TextField
+          size="small"
+          id="tag-user-name-filter"
+          label="Filter by Tag User Name"
+          variant="outlined"
+          value={tagUserNameFilter}
+          onChange={handleTagUserNameChange}
+          sx={{ fontSize: ".9rem", m: 1, minWidth: 200 }}
+        />
         <BarChart
           dataset={dataset}
           xAxis={[{ scaleType: "band", dataKey: "x", height: 40}]}
