@@ -257,7 +257,7 @@ const ChargingStatusTable: React.FC<ChargingStatusTableProps> = ({
       disableColumnMenu: true,
       hideSortIcons: true,
       renderCell: (params) => {
-        if (userType == "Admin" && ["Preparing"].includes(params.row.status))
+        if (userType == "Admin" && ["Preparing", "Finishing"].includes(params.row.status))
           return (
             <RemoteStart
               api={api}
