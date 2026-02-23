@@ -14,7 +14,7 @@ export interface RemoteStartProp {
   charger_id: string;
   charger_alias: string;
   connector_id: number;
-  snack: Function;
+  snack: (message: string) => void;
 }
 
 const RemoteStart: React.FC<RemoteStartProp> = ({
@@ -34,14 +34,14 @@ const RemoteStart: React.FC<RemoteStartProp> = ({
     setOpen(false);
   };
 
-  const RemoteStart = async (id_tag: string) => {
+  const remoteStart = async (id_tag: string) => {
     handleClose();
     const [ok] = await api.call("RemoteStartTransaction", {
       charger_id: charger_id,
       connector_id: connector_id,
       id_tag: id_tag,
     });
-    if (ok) {
+    if (ok == 3) {
       snack("Remote start successful - status may take a while to update");
     } else {
       snack("Remote start failed");
@@ -60,13 +60,19 @@ const RemoteStart: React.FC<RemoteStartProp> = ({
         slotProps={{
           paper: {
             component: "form",
-            onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+            onSubmit: (event: React.FormEvent<HTMLDivElement>) => {
               event.preventDefault();
-              const formData = new FormData(event.currentTarget);
-              const formJson = Object.fromEntries((formData as any).entries());
+              const form = event.currentTarget.querySelector("form");
+              if (form == null) return;
+              const formData = new FormData(form);
+              const formJson = Object.fromEntries(formData.entries()) as Record<
+                string,
+                FormDataEntryValue
+              >;
               const id_tag = formJson.id_tag;
-              RemoteStart(id_tag);
-              handleClose();
+              if (typeof id_tag === "string") {
+                void remoteStart(id_tag);
+              }
             },
           },
         }}

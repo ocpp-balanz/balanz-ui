@@ -45,8 +45,9 @@ const UserTable: React.FC<UserTableProps> = ({ api }) => {
     const getUsers = async () => {
       const [ok, payload] = await api.call("GetUsers", {});
       if (ok == 3) {
-        console.log("Succesfully retrieved users, #", payload.length);
-        setUserData([BLANKUSER, ...payload]);
+        const user_payload = payload as Array<USER>;
+        console.log("Succesfully retrieved users, #", user_payload.length);
+        setUserData([BLANKUSER, ...user_payload]);
       } else {
         console.log("Error getting users");
         snack("Error getting users");
@@ -127,7 +128,7 @@ const UserTable: React.FC<UserTableProps> = ({ api }) => {
       headerName: "Password",
       flex: 4,
       editable: true,
-      valueGetter: (_) => "(hidden)",
+      valueGetter: () => "(hidden)",
     },
     {
       field: "delete",
@@ -154,10 +155,11 @@ const UserTable: React.FC<UserTableProps> = ({ api }) => {
   }
 
   function CustomToolbar() {
+    const csvOptions = { fileName: "users" };
     return (
       <GridToolbarContainer>
         <Box sx={{ flexGrow: 1 }} />
-        <GridToolbarExport />
+        <GridToolbarExport csvOptions={csvOptions} />
       </GridToolbarContainer>
     );
   }

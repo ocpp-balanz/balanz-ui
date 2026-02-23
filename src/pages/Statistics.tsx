@@ -21,8 +21,9 @@ const Statistics: React.FC<StatisticsProp> = ({ api }) => {
         include_live: "true",
       });
       if (ok == 3) {
-        console.log("Succesfully retrieved sessions, #", payload.length);
-        setSessionData(payload);
+        const session_payload = payload as Array<SESSION>;
+        console.log("Succesfully retrieved sessions, #", session_payload.length);
+        setSessionData(session_payload);
       } else {
         console.log("Error getting sessions");
       }
@@ -40,7 +41,7 @@ const Statistics: React.FC<StatisticsProp> = ({ api }) => {
     const getGroups = async () => {
       const [ok, payload] = await api.call("GetGroups", {});
       if (ok == 3) {
-        setGroupData(payload);
+        setGroupData(payload as Array<GROUP>);
       } else {
         console.log("Error getting groups");
       }
@@ -53,7 +54,7 @@ const Statistics: React.FC<StatisticsProp> = ({ api }) => {
     const getChargers = async () => {
       const [ok, payload] = await api.call("GetChargers", {});
       if (ok == 3) {
-        setChargerData(payload);
+        setChargerData(payload as Array<CHARGER>);
       } else {
         console.log("Error getting chargers");
       }

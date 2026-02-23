@@ -20,8 +20,9 @@ const Status: React.FC<StatusProp> = ({ api, userType }) => {
         charger_details: true,
       });
       if (ok == 3) {
-        console.log("Succesfully retrieved groups, #", payload.length);
-        setGroupData(payload);
+        const group_payload = payload as Array<GROUP>;
+        console.log("Succesfully retrieved groups, #", group_payload.length);
+        setGroupData(group_payload);
       } else {
         console.log("Error getting groups");
       }

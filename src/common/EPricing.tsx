@@ -16,16 +16,30 @@ type HOUR_PRICE = {
 };
 
 const ZONES = ["DK1", "DK2"];
+const MAX_CACHE_DAYS = 90;
 
-// Init zones. Each zone is again a map with mapping of star_time (top of hour) => price
-const zone_prices = new Map();
+// Init zones. Each zone is again a map with mapping of start_time (top of hour) => price
+const zone_prices = new Map<string, Map<number, number>>();
+
+function normalize_price_data(raw: unknown): Array<HOUR_PRICE> | null {
+  if (Array.isArray(raw)) return raw as Array<HOUR_PRICE>;
+  if (typeof raw == "string") {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) return parsed as Array<HOUR_PRICE>;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
 function tarif(start_time: Dayjs): number {
   // Energy tariff. Fixed
   let energy_tariff = 0.727; // DKK/kwh
 
   // Temporarily at 0.008 DKK/kwh for 2026 and 2027
-  if (start_time.year() == 2026 || start_time.year() == 2027) 
+  if (start_time.year() == 2026 || start_time.year() == 2027)
     energy_tariff = 0.008;
 
   // Base tariff / kwh
@@ -52,17 +66,17 @@ function total_kwh_price(
   zone: string = "DK2",
 ): [number, number] {
   const start_unix = start_time.unix();
-  if (!zone_prices.has(zone) || !zone_prices.get(zone).has(start_unix)) {
+  if (!zone_prices.has(zone) || !zone_prices.get(zone)?.has(start_unix)) {
     console.log("WARNING: Could not find price.", start_time);
     return [0, 0];
   }
 
-  const spot_price = zone_prices.get(zone).get(start_unix);
+  const spot_price = zone_prices.get(zone)?.get(start_unix) ?? 0;
   const tariff_price = tarif(start_time);
   return [spot_price, tariff_price];
 }
 
-async function download_prices(start_time: number): Promise<void> {
+async function download_prices(start_time: number, end_time: number): Promise<void> {
   const call_api = async (url: string) => {
     const response = await fetch(url, { mode: "cors" });
     if (response.ok) {
@@ -73,17 +87,24 @@ async function download_prices(start_time: number): Promise<void> {
     }
   };
 
+  const start_date = dayjs.unix(start_time).startOf("day");
+  const end_date = dayjs.unix(end_time).startOf("day");
+  const total_days = Math.max(0, end_date.diff(start_date, "day") + 1);
+  const allow_cache = total_days <= MAX_CACHE_DAYS;
+
   const date_loop = async () => {
     for (let zindex = 0; zindex < ZONES.length; zindex++) {
       for (
-        let date = dayjs.unix(start_time).startOf("day");
-        date <= dayjs();
+        let date = start_date;
+        date <= end_date;
         date = date.add(1, "day")
       ) {
         const date_string = dayjs(date).format("YYYY-MM-DD");
         const storage_ix =
           "price-" + ZONES[zindex] + "-" + date.format("YYYY-MM-DD");
-        if (getItem(storage_ix) === null || getItem(storage_ix) == "") {
+        const storage_value = getItem<unknown>(storage_ix);
+        let price_data = normalize_price_data(storage_value);
+        if (price_data == null || price_data.length == 0) {
           console.log("No data for " + date_string);
           const url =
             "https://www.elprisenligenu.dk/api/v1/prices/" +
@@ -100,27 +121,24 @@ async function download_prices(start_time: number): Promise<void> {
             );
             continue;
           } else {
-            setItem(storage_ix, JSON.stringify(data));
+            price_data = normalize_price_data(data);
+            if (allow_cache) setItem(storage_ix, data);
           }
         }
-        const price_data: Array<HOUR_PRICE> = JSON.parse(
-          // @ts-expect-error
-          getItem<Array<HOUR_PRICE>>(storage_ix),
-        );
         if (price_data == null || price_data.length == 0) {
           console.log("ERROR - no price data", price_data);
+          continue;
         }
         for (let i = 0; i < price_data.length; i++) {
           const ts = dayjs(price_data[i].time_start).unix();
           if (zone_prices.get(ZONES[zindex]) == null)
             zone_prices.set(ZONES[zindex], new Map());
-          zone_prices.get(ZONES[zindex]).set(ts, price_data[i].DKK_per_kWh);
+          zone_prices.get(ZONES[zindex])?.set(ts, price_data[i].DKK_per_kWh);
         }
       }
     }
   };
   await date_loop();
-  console.log("TEST2: " + total_kwh_price());
 }
 
 export async function price_session_data(
@@ -128,10 +146,23 @@ export async function price_session_data(
   chargerData: Array<CHARGER>,
 ) {
   if (sessionData.length == 0) return;
-  await download_prices(sessionData[0].start_time);
+
+  const earliest_start_time = sessionData.reduce(
+    (min_start, session) => Math.min(min_start, session.start_time),
+    sessionData[0].start_time,
+  );
+  const latest_end_time = sessionData.reduce((max_end, session) => {
+    const session_end =
+      typeof session.end_time === "number" && session.end_time > 0
+        ? session.end_time
+        : session.start_time;
+    return Math.max(max_end, session_end);
+  }, sessionData[0].start_time);
+
+  await download_prices(earliest_start_time, latest_end_time);
 
   // Let's turn chargerData into a map for quick lookup into description which can hold tariff related info.
-  const charger_desc_map = new Map();
+  const charger_desc_map = new Map<string, string>();
   for (let i = 0; i < chargerData.length; i++)
     charger_desc_map.set(chargerData[i].charger_id, chargerData[i].description);
 
@@ -172,17 +203,17 @@ export function price_currency(): string {
 
 export function tariff_tooltip(): string {
   return (
-    "Tariffen består af 4 konstante elementer og 1 dynamisk element (alt uden moms):\n" +
+    "Tariffen best\u00e5r af 4 konstante elementer og 1 dynamisk element (alt uden moms):\n" +
     "1. Elafgift: 0.727 DKK/kWh (0.008 DKK/kwh i hele 2026/2027)\n" +
     "2. Nettarif: 0.061 DKK/kWh\n" +
     "3. Systemtarif: 0.074 DKK/kWh\n" +
-    "4. El leverandør grøn strøm: 0.05 DKK/kWh\n" +
-    "5. Distributionsafgift (afhænger af tidspunkt og årstid):\n" +
+    "4. El leverand\u00f8r gr\u00f8n str\u00f8m: 0.05 DKK/kWh\n" +
+    "5. Distributionsafgift (afh\u00e6nger af tidspunkt og \u00e5rstid):\n" +
     "   - Vinter: 0.0976 DKK/kWh (00-06), 0.2929 DKK/kWh (06-17 & 21-00), 0.8788 DKK/kWh (17-21)\n" +
     "   - Sommer: 0.0976 DKK/kWh (00-06), 0.1465 DKK/kWh (06-17 & 21-00), 0.3808 DKK/kWh (17-21)"
   );
 }
 
 export function spot_tooltip(): string {
-  return "El spotpris afhængig tidspunkt og laderens lokation (DK1 or DK2)";
+  return "El spotpris afh\u00e6ngig tidspunkt og laderens lokation (DK1 or DK2)";
 }

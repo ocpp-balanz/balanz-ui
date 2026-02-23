@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { Container } from "@mui/material";
 import ResponsiveAppBar from "./components/ResponsiveAppBar";
@@ -43,9 +43,9 @@ const App: React.FC<AppProp> = ({ api }) => {
     api.set_connstate_func(setConnState);
     api.connect();
     setTimeout(() => setLoading(false), 2000);
-  }, []);
+  }, [api]);
 
-  useMemo(() => {
+  useEffect(() => {
     const doLogin = async () => {
       if (token != "" && connState == CONN_STATE.CONNECTED) {
         console.log("Logging in");
@@ -59,7 +59,7 @@ const App: React.FC<AppProp> = ({ api }) => {
       }
     };
     doLogin();
-  }, [token, connState]);
+  }, [token, connState, api]);
 
   if (loading) return <Loader />;
 

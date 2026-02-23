@@ -12,7 +12,7 @@ export interface DeleteChargerProp {
   api: BalanzAPI;
   charger_id: string;
   charger_alias: string;
-  snack: Function;
+  snack: (message: string) => void;
 }
 
 const DeleteCharger: React.FC<DeleteChargerProp> = ({
@@ -34,7 +34,7 @@ const DeleteCharger: React.FC<DeleteChargerProp> = ({
   const remoteStop = async () => {
     handleClose();
     const [ok] = await api.call("DeleteCharger", { charger_id: charger_id });
-    if (ok) {
+    if (ok == 3) {
       snack("Charger succesfully deleted - pls manually refresh table");
     } else {
       snack("Failed to delete charger");

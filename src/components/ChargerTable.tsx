@@ -100,7 +100,7 @@ const ChargerTable: React.FC<ChargerTableProps> = ({ api, userType }) => {
     const getChargers = async () => {
       const [ok, payload] = await api.call("GetChargers", {});
       if (ok == 3) {
-        setChargerData([BLANKCHARGER, ...payload]);
+        setChargerData([BLANKCHARGER, ...(payload as Array<CHARGER>)]);
       } else {
         console.log("Error getting chargers");
       }
@@ -276,10 +276,11 @@ const ChargerTable: React.FC<ChargerTableProps> = ({ api, userType }) => {
   }
 
   function CustomToolbar() {
+    const csvOptions = { fileName: "chargers" };
     return (
       <GridToolbarContainer>
         <Box sx={{ flexGrow: 1 }} />
-        <GridToolbarExport />
+        <GridToolbarExport csvOptions={csvOptions} />
       </GridToolbarContainer>
     );
   }

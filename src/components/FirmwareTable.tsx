@@ -49,8 +49,9 @@ const FirmwareTable: React.FC<FirmwareTableProps> = ({ api }) => {
     const getFirmware = async () => {
       const [ok, payload] = await api.call("GetFirmware", {});
       if (ok == 3) {
-        console.log("Succesfully retrieved firmware, #", payload.length);
-        setFirmwareData([BLANKFirmware, ...payload]);
+        const firmware_payload = payload as Array<FIRMWARE>;
+        console.log("Succesfully retrieved firmware, #", firmware_payload.length);
+        setFirmwareData([BLANKFirmware, ...firmware_payload]);
       } else {
         console.log("Error getting firmware");
         snack("Error getting firmware");

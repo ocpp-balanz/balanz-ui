@@ -12,7 +12,7 @@ export interface ResetChargerProp {
   api: BalanzAPI;
   charger_id: string;
   charger_alias: string;
-  snack: Function;
+  snack: (message: string) => void;
 }
 
 const ResetCharger: React.FC<ResetChargerProp> = ({
@@ -37,7 +37,7 @@ const ResetCharger: React.FC<ResetChargerProp> = ({
       charger_id: charger_id,
       type: mode,
     });
-    if (ok) {
+    if (ok == 3) {
       snack("Reset succesful");
     } else {
       snack("Reset failed");

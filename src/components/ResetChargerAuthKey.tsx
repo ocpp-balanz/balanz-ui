@@ -12,7 +12,7 @@ export interface ResetChargerAuthKeyProp {
   api: BalanzAPI;
   charger_id: string;
   charger_alias: string;
-  snack: Function;
+  snack: (message: string) => void;
 }
 
 const ResetChargerAuthKey: React.FC<ResetChargerAuthKeyProp> = ({
@@ -34,7 +34,7 @@ const ResetChargerAuthKey: React.FC<ResetChargerAuthKeyProp> = ({
   const resetChargerAuth = async () => {
     handleClose();
     const [ok] = await api.call("ResetChargerAuth", { charger_id: charger_id });
-    if (ok) {
+    if (ok == 3) {
       snack("Charger Authorization Key reset succesful");
     } else {
       snack("Charger Authorization Key reset failed");

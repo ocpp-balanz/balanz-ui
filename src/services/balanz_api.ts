@@ -2,9 +2,10 @@ import { Dispatch, SetStateAction } from "react";
 import { CONN_STATE } from "../types/types";
 import { sleep } from "../common/utils";
 
-type BalanzResult = [number, any];
+type BalanzResult = [number, unknown];
+type ResultCallback = (result: BalanzResult) => void;
 type CallFunction = {
-  resolve: Function;
+  resolve: ResultCallback;
 };
 
 export default class BalanzAPI {
@@ -71,19 +72,19 @@ export default class BalanzAPI {
     };
 
     this.ws.onmessage = (evt) => {
-      const message = evt.data;
-      const result = JSON.parse(message);
-      if (result.length != 3) {
+      const message = String(evt.data);
+      const result = JSON.parse(message) as unknown;
+      if (!Array.isArray(result) || result.length != 3) {
         // Ups.
         console.log("ERROR in response. Don't know that to do");
         console.log(message);
       } else {
-        const [result_type, message_id, payload] = JSON.parse(message);
+        const [result_type, message_id, payload] = result;
 
-        if (this.outstanding_calls.has(message_id)) {
+        if (typeof message_id === "string" && this.outstanding_calls.has(message_id)) {
           const call = this.outstanding_calls.get(message_id);
-          const result: BalanzResult = [result_type, payload];
-          call?.resolve(result);
+          const result_payload: BalanzResult = [Number(result_type), payload];
+          call?.resolve(result_payload);
           this.outstanding_calls.delete(message_id);
         } else {
           console.log("No matching message_id. Throwing response away.");
@@ -100,11 +101,11 @@ export default class BalanzAPI {
     ).toString();
   }
 
-  static dummy(data: any): void {
+  static dummy(data: BalanzResult): void {
     console.log("dummy called. LOGIC ERROR", data);
   }
 
-  async call(command: string, payload: any): Promise<BalanzResult> {
+  async call(command: string, payload: unknown): Promise<BalanzResult> {
     if (!this.connected || !this.ws) return [0, null];
     const message_id = BalanzAPI.gen_message_id();
     try {
@@ -127,7 +128,7 @@ export default class BalanzAPI {
   async call_async(
     command: string,
     payload: unknown,
-    callback: Function,
+    callback: ResultCallback,
   ): Promise<void> {
     if (!this.connected || !this.ws) return;
     const message_id = BalanzAPI.gen_message_id();
@@ -147,7 +148,13 @@ export default class BalanzAPI {
   async login(token: string): Promise<string> {
     const [ok, payload] = await this.call("Login", { token: token });
     if (ok == 3) {
-      const user_type = payload["user_type"];
+      const user_type =
+        typeof payload === "object" &&
+        payload != null &&
+        "user_type" in payload &&
+        typeof payload.user_type === "string"
+          ? payload.user_type
+          : "";
       console.log("Succesfully logged in as " + user_type);
       this.token = token;
       if (this.setConnState) this.setConnState(CONN_STATE.LOGGED_IN);

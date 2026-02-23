@@ -48,8 +48,9 @@ const TagTable: React.FC<TagTableProps> = ({ api }) => {
     const getTags = async () => {
       const [ok, payload] = await api.call("GetTags", {});
       if (ok == 3) {
-        console.log("Succesfully retrieved tags, #", payload.length);
-        setTagData([BLANKTAG, ...payload]);
+        const tag_payload = payload as Array<TAG>;
+        console.log("Succesfully retrieved tags, #", tag_payload.length);
+        setTagData([BLANKTAG, ...tag_payload]);
       } else {
         console.log("Error getting tags");
         snack("Error getting tags");
@@ -165,10 +166,11 @@ const TagTable: React.FC<TagTableProps> = ({ api }) => {
   }
 
   function CustomToolbar() {
+    const csvOptions = { fileName: "tags" };
     return (
       <GridToolbarContainer>
         <Box sx={{ flexGrow: 1 }} />
-        <GridToolbarExport />
+        <GridToolbarExport csvOptions={csvOptions} />
       </GridToolbarContainer>
     );
   }

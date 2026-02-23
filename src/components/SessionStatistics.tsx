@@ -78,8 +78,8 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   const [charger, setCharger] = useState<string>("(all)");
   const [dataset, setDataset] = useState<Array<DATAENTRY>>([]);
   const [totalRow, setTotalRow] = useState<Array<DATAENTRY>>([]);
-  const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
-  const [dateview, setDateview] = useState<Array<String>>([
+  const [augmentationRevision, setAugmentationRevision] = useState<number>(0);
+  const [dateview, setDateview] = useState<Array<string>>([
     "year",
     "month",
     "day",
@@ -243,7 +243,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
         setDateview(["year"]);
       }
     }
-  }, [period]);
+  }, [period, sessionData]);
 
   // Recalc total
   useEffect(() => {
@@ -277,17 +277,15 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
     const augmentData = async () => {
       augment_session_data(sessionData);
       await price_session_data(sessionData, chargerData);
-      setSessionAugmented(true);
+      setAugmentationRevision((revision) => revision + 1);
     };
-  
-    if (!sessionAugmented) {
-      augmentData();
-    }
-  }, [sessionData, sessionAugmented, chargerData]);
+
+    void augmentData();
+  }, [sessionData, chargerData]);
 
   // Transform sessionData to required graph dataset
   useEffect(() => {
-    if (!sessionAugmented || startDate == null) return;
+    if (augmentationRevision == 0 || startDate == null) return;
 
     // Basic algorithm is to first create a number of time interval "buckets" based on the period setting.
     // Then next step is to distribute the charging entry wh values into those buckets (assuming of course
@@ -410,10 +408,10 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
     if (result.length > 0) result.pop();
 
     setDataset(result);
-  }, [period, group, charger, sessionData, sessionAugmented, startDate, tagFilter, tagUserNameFilter]);
+  }, [period, group, charger, sessionData, augmentationRevision, startDate, tagFilter, tagUserNameFilter]);
 
   // Setup right axis stuff
-  let yAxis = [
+  const yAxis = [
     {
       id: "energyAxis",
       scaleType: "linear",
@@ -430,7 +428,7 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
       position: "right",
       min: 0,
     });
-  let series = [
+  const series = [
     {
       dataKey: "energy",
       label: "Energy",
@@ -458,160 +456,161 @@ const SessionStatistics: React.FC<SessionStatisticsProps> = ({
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box>
-        <FormControl sx={{ m: 1, minWidth: 100 }}>
-          <InputLabel id="select-period">Period</InputLabel>
-          <Select
-            labelId="select-period"
-            id="select-period"
-            value={period}
-            label="Period"
-            onChange={handlePeriodChange}
-            sx={{ fontSize: ".9rem" }}
-          >
-            <MenuItem value={"last48hours"} sx={{ fontSize: ".9rem" }}>
-              Last 48 hours
-            </MenuItem>
-            <MenuItem value={"lastmonth"} sx={{ fontSize: ".9rem" }}>
-              Last month
-            </MenuItem>
-            <MenuItem value={"48hours"} sx={{ fontSize: ".9rem" }}>
-              48 hours
-            </MenuItem>
-            <MenuItem value={"month"} sx={{ fontSize: ".9rem" }}>
-              Month
-            </MenuItem>
-            <MenuItem value={"year"} sx={{ fontSize: ".9rem" }}>
-              Year
-            </MenuItem>
-            <MenuItem value={"overall"} sx={{ fontSize: ".9rem" }}>
-              Overall
-            </MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 200 }}>
-          <DatePicker
-            // @ts-expect-error Much easier this way
-            views={dateview}
-            label="Start"
-            sx={{ fontSize: ".9rem" }}
-            value={startDate}
-            onChange={(newValue) => {
-              if (newValue !== null) setStartDate(newValue);
+        <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", gap: 1, mb: 1 }}>
+          <FormControl sx={{ minWidth: 100 }}>
+            <InputLabel id="select-period">Period</InputLabel>
+            <Select
+              labelId="select-period"
+              id="select-period"
+              value={period}
+              label="Period"
+              onChange={handlePeriodChange}
+            >
+              <MenuItem value={"last48hours"}>
+                Last 48 hours
+              </MenuItem>
+              <MenuItem value={"lastmonth"}>
+                Last month
+              </MenuItem>
+              <MenuItem value={"48hours"}>
+                48 hours
+              </MenuItem>
+              <MenuItem value={"month"}>
+                Month
+              </MenuItem>
+              <MenuItem value={"year"}>
+                Year
+              </MenuItem>
+              <MenuItem value={"overall"}>
+                Overall
+              </MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl sx={{ minWidth: 200 }}>
+            <DatePicker
+              // @ts-expect-error Much easier this way
+              views={dateview}
+              label="Start"
+              value={startDate}
+              onChange={(newValue) => {
+                if (newValue !== null) setStartDate(newValue);
+              }}
+            />
+          </FormControl>
+          <FormControl sx={{ minWidth: 250 }}>
+            <InputLabel id="select-group">Group</InputLabel>
+            <Select
+              labelId="select-group"
+              id="select-group"
+              value={group}
+              label="Group"
+              multiple={true}
+              onChange={handleGroupChange}
+              renderValue={(selected) => {
+                const all_selected = selected.join(", ");
+                if (all_selected.length > 40)
+                  return all_selected.substring(0, 40) + "...";
+                return all_selected;
+              }}
+            >
+              {groupData.map((group) => (
+                <MenuItem
+                  key={group.group_id}
+                  value={group.group_id}
+                >
+                  {group.group_id}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Box sx={{ display: "flex", alignItems: "center", pb: 0.5 }}>
+            <Stack direction="row" spacing={0}>
+              <IconButton onClick={handleAdd} size="small">
+                <AddIcon />
+              </IconButton>
+              <IconButton onClick={handleClear} size="small">
+                <ClearIcon />
+              </IconButton>
+            </Stack>
+          </Box>
+          <FormControl sx={{ minWidth: 100 }}>
+            <InputLabel id="select-charger">Charger</InputLabel>
+            <Select
+              labelId="select-charger"
+              id="select-charger"
+              value={charger}
+              label="Charger"
+              onChange={handleChargerChange}
+            >
+              <MenuItem value={"(all)"}>
+                (all)
+              </MenuItem>
+              {group.length === 1
+                ? chargerData
+                    .filter((c) => c.group_id == group[0])
+                    .map((ch) => (
+                      <MenuItem
+                        key={ch.charger_id}
+                        value={ch.charger_id}
+                      >
+                        {ch.alias}
+                      </MenuItem>
+                    ))
+                : ""}
+            </Select>
+          </FormControl>
+          <FormControl sx={{ minWidth: 100 }}>
+            <InputLabel id="select-right">Show Prices</InputLabel>
+            <Select
+              labelId="select-right"
+              id="select-right"
+              value={showRight ? "true" : "false"}
+              label="Show Prices"
+              onChange={handleRightChange}
+            >
+              <MenuItem value={"false"}>
+                Do not show
+              </MenuItem>
+              <MenuItem value={"true"}>
+                Show
+              </MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            id="tag-filter"
+            label="Filter by Tag"
+            variant="outlined"
+            value={tagFilter}
+            onChange={handleTagFilterChange}
+            sx={{ minWidth: 200 }}
+            slotProps={{
+              inputLabel: { shrink: true },
             }}
           />
-        </FormControl>
-        <FormControl sx={{ my: 1, minWidth: 250 }}>
-          <InputLabel id="select-group">Group</InputLabel>
-          <Select
-            labelId="select-group"
-            id="select-group"
-            value={group}
-            label="Group"
-            multiple={true}
-            onChange={handleGroupChange}
-            sx={{ fontSize: ".9rem" }}
-            renderValue={(selected) => {
-              const all_selected = selected.join(", ");
-              if (all_selected.length > 40)
-                return all_selected.substring(0, 40) + "...";
-              return all_selected;
+          <TextField
+            id="tag-user-name-filter"
+            label="Filter by User Name"
+            variant="outlined"
+            value={tagUserNameFilter}
+            onChange={handleTagUserNameChange}
+            sx={{ minWidth: 200 }}
+            slotProps={{
+              inputLabel: { shrink: true },
             }}
-          >
-            {groupData.map((group) => (
-              <MenuItem
-                key={group.group_id}
-                value={group.group_id}
-                sx={{ fontSize: ".9rem" }}
-              >
-                {group.group_id}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ m: 0 }}>
-          <Stack direction="column" spacing={0}>
-            <IconButton onClick={handleAdd} size="small">
-              <AddIcon />
-            </IconButton>
-            <IconButton onClick={handleClear} size="small">
-              <ClearIcon />
-            </IconButton>
-          </Stack>
-        </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 100 }}>
-          <InputLabel id="select-charger">Charger</InputLabel>
-          <Select
-            labelId="select-charger"
-            id="select-charger"
-            value={charger}
-            label="Charger"
-            onChange={handleChargerChange}
-            sx={{ fontSize: ".9rem" }}
-          >
-            <MenuItem value={"(all)"} sx={{ fontSize: ".9rem" }}>
-              (all)
-            </MenuItem>
-            {group.length === 1
-              ? chargerData
-                  .filter((c) => c.group_id == group[0])
-                  .map((ch) => (
-                    <MenuItem
-                      key={ch.charger_id}
-                      value={ch.charger_id}
-                      sx={{ fontSize: ".9rem" }}
-                    >
-                      {ch.alias}
-                    </MenuItem>
-                  ))
-              : ""}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 100 }}>
-          <InputLabel id="select-right">Show Prices</InputLabel>
-          <Select
-            labelId="select-right"
-            id="select-right"
-            value={showRight ? "true" : "false"}
-            label="Show Prices"
-            onChange={handleRightChange}
-            sx={{ fontSize: ".9rem" }}
-          >
-            <MenuItem value={"false"} sx={{ fontSize: ".9rem" }}>
-              Do not show
-            </MenuItem>
-            <MenuItem value={"true"} sx={{ fontSize: ".9rem" }}>
-              Show
-            </MenuItem>
-          </Select>
-        </FormControl>
-        <TextField
-          size="small"
-          id="tag-filter"
-          label="Filter by Tag"
-          variant="outlined"
-          value={tagFilter}
-          onChange={handleTagFilterChange}
-          sx={{ fontSize: ".9rem", m: 1, minWidth: 200 }}
-          slotProps={{
-            inputLabel: { shrink: true },
-          }}
-        />
-        <TextField
-          size="small"
-          id="tag-user-name-filter"
-          label="Filter by User Name"
-          variant="outlined"
-          value={tagUserNameFilter}
-          onChange={handleTagUserNameChange}
-          sx={{ fontSize: ".9rem", m: 1, minWidth: 200 }}
-          slotProps={{
-            inputLabel: { shrink: true },
-          }}
-        />
+          />
+        </Box>
         <BarChart
           dataset={dataset}
-          xAxis={[{ scaleType: "band", dataKey: "x" }]}
-          // @ts-expect-error
+          xAxis={[
+            {
+              scaleType: "band",
+              dataKey: "x",
+              // Keep 48h labels on two lines: date over hour.
+              tickLabelStyle: { whiteSpace: "pre" },
+              height: period == "48hours" || period == "last48hours" ? 44 : 30,
+            },
+          ]}
+          // @ts-expect-error MUI X Charts infers a narrower axis type than runtime accepts here.
           yAxis={yAxis}
           series={series}
           leftAxis="energyAxis"

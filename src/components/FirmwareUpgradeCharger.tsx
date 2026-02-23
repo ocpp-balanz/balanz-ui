@@ -15,7 +15,7 @@ export interface FirmwareUpgradeChargerProp {
   api: BalanzAPI;
   charger_id: string;
   charger_alias: string;
-  snack: Function;
+  snack: (message: string) => void;
   fw_options: Array<FIRMWARE_OPTION>;
 }
 
@@ -52,7 +52,7 @@ const FirmwareUpgradeCharger: React.FC<FirmwareUpgradeChargerProp> = ({
       charger_id: charger_id,
       location: url,
     });
-    if (ok) {
+    if (ok == 3) {
       snack("Firmware update initiated. Check status and logs");
     } else {
       snack("Firmware update failed to initialize");

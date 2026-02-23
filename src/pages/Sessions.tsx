@@ -18,8 +18,9 @@ const Sessions: React.FC<StatusProp> = ({ api }) => {
     const getSessions = async () => {
       const [ok, payload] = await api.call("GetSessions", {});
       if (ok == 3) {
-        console.log("Succesfully retrieved sessions, #", payload.length);
-        setSessionData(payload);
+        const session_payload = payload as Array<SESSION>;
+        console.log("Succesfully retrieved sessions, #", session_payload.length);
+        setSessionData(session_payload);
       } else {
         console.log("Error getting sessions");
       }
@@ -37,7 +38,7 @@ const Sessions: React.FC<StatusProp> = ({ api }) => {
     const getChargers = async () => {
       const [ok, payload] = await api.call("GetChargers", {});
       if (ok == 3) {
-        setChargerData(payload);
+        setChargerData(payload as Array<CHARGER>);
       } else {
         console.log("Error getting chargers");
       }

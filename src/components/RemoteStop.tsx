@@ -14,7 +14,7 @@ export interface RemoteStopProp {
   charger_alias: string;
   connector_id: number;
   transaction_id: number;
-  snack: Function;
+  snack: (message: string) => void;
 }
 
 const RemoteStop: React.FC<RemoteStopProp> = ({
@@ -42,7 +42,7 @@ const RemoteStop: React.FC<RemoteStopProp> = ({
       connector_id: connector_id,
       transaction_id: transaction_id,
     });
-    if (ok) {
+    if (ok == 3) {
       snack("Remote stop successful - status may take a while to update");
     } else {
       snack("Remote stop failed");

@@ -53,12 +53,19 @@ const Logs: React.FC<LogsProp> = ({ api }) => {
   const getLogs = async () => {
     const filtered = Object.fromEntries(
       Object.entries(filters).filter(
-        ([_, v]) => v !== undefined && v !== "" && v != "ALL",
+        ([, v]) => v !== undefined && v !== "" && v != "ALL",
       ),
     );
     const [ok, payload] = await api.call("GetLogs", { filters: filtered });
     if (ok == 3) {
-      setLogs(payload["logs"]);
+      const logs_payload =
+        typeof payload === "object" &&
+        payload != null &&
+        "logs" in payload &&
+        Array.isArray(payload.logs)
+          ? (payload.logs as Array<LOGENTRY>)
+          : [];
+      setLogs(logs_payload);
       console.log("Succesfully retrieved logs, #", logs.length);
     } else {
       console.log("Error getting logs");

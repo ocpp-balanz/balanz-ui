@@ -37,7 +37,7 @@ const GroupTable: React.FC<GroupTableProps> = ({ api }) => {
     const getGroups = async () => {
       const [ok, payload] = await api.call("GetGroups", {});
       if (ok == 3) {
-        setGroupData(payload);
+        setGroupData(payload as Array<GROUP>);
       } else {
         console.log("Error getting groups");
       }
@@ -89,10 +89,11 @@ const GroupTable: React.FC<GroupTableProps> = ({ api }) => {
   }
 
   function CustomToolbar() {
+    const csvOptions = { fileName: "groups" };
     return (
       <GridToolbarContainer>
         <Box sx={{ flexGrow: 1 }} />
-        <GridToolbarExport />
+        <GridToolbarExport csvOptions={csvOptions} />
       </GridToolbarContainer>
     );
   }

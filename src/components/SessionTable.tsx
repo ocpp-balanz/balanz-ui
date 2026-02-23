@@ -35,12 +35,12 @@ const SessionTable: React.FC<SessionTableProps> = ({
   sessionData,
   chargerData,
 }) => {
-  const [sessionAugmented, setSessionAugmented] = useState<boolean>(false);
+  const [, setAugmentRevision] = useState<number>(0);
 
   function get_history_data(
     history: Array<CHARGING_ENTRY>,
   ): Array<CHARGING_ENTRY> {
-    history.map((e) => {
+    history.forEach((e) => {
       e.date = new Date(e.timestamp * 1000);
     });
     return history;
@@ -48,23 +48,21 @@ const SessionTable: React.FC<SessionTableProps> = ({
 
   // Initial augmentation of sessionData. For each historic CHARGING_ENTRY element,
   // a net Wh usage value will be added.
- useEffect(() => {
+  useEffect(() => {
     const augmentData = async () => {
       augment_session_data(sessionData);
       await price_session_data(sessionData, chargerData);
-      setSessionAugmented(true);
+      setAugmentRevision((rev) => rev + 1);
     };
-  
-    if (!sessionAugmented) {
-      augmentData();
-    }
-  }, [sessionData, sessionAugmented, chargerData]);
+
+    void augmentData();
+  }, [sessionData, chargerData]);
 
   function download_sessions() {
     const getSessionsCSV = async () => {
       const [ok, payload] = await api.call("GetCSVSessions", {});
       if (ok == 3) {
-        const blob = new Blob([payload], { type: "text/csv" });
+        const blob = new Blob([String(payload)], { type: "text/csv" });
 
         // Create a temporary link element
         const link = document.createElement("a");
@@ -203,10 +201,11 @@ const SessionTable: React.FC<SessionTableProps> = ({
   ];
 
   function CustomToolbar() {
+    const csvOptions = { fileName: "sessions" };
     return (
       <GridToolbarContainer>
         <Box sx={{ flexGrow: 1 }} />
-        <GridToolbarExport />
+        <GridToolbarExport csvOptions={csvOptions} />
       </GridToolbarContainer>
     );
   }
@@ -226,6 +225,7 @@ const SessionTable: React.FC<SessionTableProps> = ({
         density="compact"
         sx={{ fontSize: ".8rem", width: "100%" }}
         slots={{ toolbar: CustomToolbar }}
+        showToolbar
         initialState={{
           sorting: {
             sortModel: [{ field: "start_time", sort: "desc" }],

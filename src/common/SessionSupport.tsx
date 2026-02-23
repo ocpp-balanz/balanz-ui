@@ -102,9 +102,7 @@ export function augment_1session(session: SESSION) {
         (session.charging_history[ci].wh ?? 0) * (overlap_s / (end - start));
       if (hour_entries[hour_index].wh == null)
         hour_entries[hour_index].wh = contrib_wh;
-      else
-        // @ts-expect-error
-        hour_entries[hour_index].wh += contrib_wh;
+      else hour_entries[hour_index].wh = (hour_entries[hour_index].wh ?? 0) + contrib_wh;
       remain -= contrib_wh;
     }
     if (remain > 1)
@@ -124,7 +122,7 @@ export function augment_1session(session: SESSION) {
   // Separate loop for kwh_total
   let kwh_total = 0.0;
   for (let hour_index = 0; hour_index < hour_entries.length; hour_index++) {
-    kwh_total += hour_entries[hour_index].wh ?? 0 / 1000.0;
+    kwh_total += (hour_entries[hour_index].wh ?? 0) / 1000.0;
     hour_entries[hour_index].kwh_total = kwh_total;
   }
 

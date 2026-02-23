@@ -27,16 +27,16 @@ export default function ChargingHistory(props: ChargingHistoryProp) {
       }
       setIsSession(true);
     }
-  }, [history, isSession]);
+  }, [history]);
 
   const openClose = () => {
     setOpen(!open);
   };
 
-  let yAxis = [{ id: "currentAxis", label: "A", position: "left", min: 0 }];
+  const yAxis = [{ id: "currentAxis", label: "A", position: "left", min: 0 }];
   if (isSession)
     yAxis.push({ id: "energyAxis", label: "kWh", position: "right", min: 0 });
-  let series = [
+  const series = [
     {
       yAxisId: "currentAxis",
       dataKey: "offered",
@@ -82,9 +82,9 @@ export default function ChargingHistory(props: ChargingHistoryProp) {
                 }),
             },
           ]}
-          // @ts-expect-error
+          // @ts-expect-error MUI X Charts infers a narrower axis type than runtime accepts here.
           yAxis={yAxis}
-          // @ts-expect-error
+          // @ts-expect-error MUI X Charts infers a narrower series type than runtime accepts here.
           series={series}
           height={600}
           width={1000}
