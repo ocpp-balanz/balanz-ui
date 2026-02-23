@@ -151,15 +151,16 @@ export async function price_session_data(
     (min_start, session) => Math.min(min_start, session.start_time),
     sessionData[0].start_time,
   );
-  const latest_end_time = sessionData.reduce((max_end, session) => {
-    const session_end =
-      typeof session.end_time === "number" && session.end_time > 0
-        ? session.end_time
-        : session.start_time;
-    return Math.max(max_end, session_end);
+  const latest_activity_time = sessionData.reduce((max_time, session) => {
+    const has_end = typeof session.end_time === "number" && session.end_time > 0;
+    // If end_time is far behind start_time, treat it as broken and ignore it.
+    const end_is_plausible =
+      has_end && (session.end_time as number) >= session.start_time - 24 * 60 * 60;
+    const session_end = end_is_plausible ? (session.end_time as number) : 0;
+    return Math.max(max_time, session.start_time, session_end);
   }, sessionData[0].start_time);
 
-  await download_prices(earliest_start_time, latest_end_time);
+  await download_prices(earliest_start_time, latest_activity_time);
 
   // Let's turn chargerData into a map for quick lookup into description which can hold tariff related info.
   const charger_desc_map = new Map<string, string>();
