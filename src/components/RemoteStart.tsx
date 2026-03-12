@@ -25,6 +25,7 @@ const RemoteStart: React.FC<RemoteStartProp> = ({
   snack,
 }) => {
   const [open, setOpen] = useState<boolean>(false);
+  const [idTag, setIdTag] = useState("");
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -32,6 +33,7 @@ const RemoteStart: React.FC<RemoteStartProp> = ({
 
   const handleClose = () => {
     setOpen(false);
+    setIdTag("");
   };
 
   const remoteStart = async (id_tag: string) => {
@@ -48,6 +50,15 @@ const RemoteStart: React.FC<RemoteStartProp> = ({
     }
   };
 
+  const handleSubmit = (event: React.FormEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const trimmedIdTag = idTag.trim();
+    if (trimmedIdTag.length === 0) {
+      return;
+    }
+    void remoteStart(trimmedIdTag);
+  };
+
   return (
     <>
       <PlayCircleIcon
@@ -60,20 +71,7 @@ const RemoteStart: React.FC<RemoteStartProp> = ({
         slotProps={{
           paper: {
             component: "form",
-            onSubmit: (event: React.FormEvent<HTMLDivElement>) => {
-              event.preventDefault();
-              const form = event.currentTarget.querySelector("form");
-              if (form == null) return;
-              const formData = new FormData(form);
-              const formJson = Object.fromEntries(formData.entries()) as Record<
-                string,
-                FormDataEntryValue
-              >;
-              const id_tag = formJson.id_tag;
-              if (typeof id_tag === "string") {
-                void remoteStart(id_tag);
-              }
-            },
+            onSubmit: handleSubmit,
           },
         }}
       >
@@ -92,11 +90,13 @@ const RemoteStart: React.FC<RemoteStartProp> = ({
             label="Tag"
             fullWidth
             variant="standard"
+            value={idTag}
+            onChange={(event) => setIdTag(event.target.value)}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" autoFocus>
+          <Button type="submit" autoFocus disabled={idTag.trim().length === 0}>
             Start
           </Button>
         </DialogActions>
