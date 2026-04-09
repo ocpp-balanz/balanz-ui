@@ -11,10 +11,9 @@ import {
   GridToolbarExport,
 } from "@mui/x-data-grid";
 import Snackbar from "@mui/material/Snackbar";
-import Button from "@mui/material/Button";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import ConfirmDeleteAction from "./ConfirmDeleteAction";
 
 interface TagTableProps {
   api: BalanzAPI;
@@ -149,13 +148,11 @@ const TagTable: React.FC<TagTableProps> = ({ api }) => {
         if (params.row.id_tag == BLANKTAG.id_tag) return <div></div>;
         else
           return (
-            <Button
-              onClick={() => {
-                delete_tag(params.row.id_tag);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </Button>
+            <ConfirmDeleteAction
+              title="Confirm Delete Tag"
+              description={`Are you sure that you want to delete the tag ${params.row.id_tag}?`}
+              onConfirm={() => delete_tag(params.row.id_tag)}
+            />
           );
       },
     },

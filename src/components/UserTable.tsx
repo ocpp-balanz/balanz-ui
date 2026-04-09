@@ -11,10 +11,9 @@ import {
   GridToolbarExport,
 } from "@mui/x-data-grid";
 import Snackbar from "@mui/material/Snackbar";
-import Button from "@mui/material/Button";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import ConfirmDeleteAction from "./ConfirmDeleteAction";
 
 interface UserTableProps {
   api: BalanzAPI;
@@ -138,13 +137,11 @@ const UserTable: React.FC<UserTableProps> = ({ api }) => {
         if (params.row.user_id == BLANKUSER.user_id) return <div></div>;
         else
           return (
-            <Button
-              onClick={() => {
-                delete_user(params.row.user_id);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </Button>
+            <ConfirmDeleteAction
+              title="Confirm Delete User"
+              description={`Are you sure that you want to delete the user ${params.row.user_id}?`}
+              onConfirm={() => delete_user(params.row.user_id)}
+            />
           );
       },
     },

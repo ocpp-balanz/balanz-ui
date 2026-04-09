@@ -1,12 +1,5 @@
-import { useState } from "react";
-import DialogTitle from "@mui/material/DialogTitle";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
 import BalanzAPI from "../services/balanz_api";
-import DeleteIcon from "@mui/icons-material/Delete";
+import ConfirmDeleteAction from "./ConfirmDeleteAction";
 
 export interface DeleteChargerProp {
   api: BalanzAPI;
@@ -21,18 +14,7 @@ const DeleteCharger: React.FC<DeleteChargerProp> = ({
   charger_alias,
   snack,
 }) => {
-  const [open, setOpen] = useState<boolean>(false);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const remoteStop = async () => {
-    handleClose();
+  const deleteCharger = async () => {
     const [ok] = await api.call("DeleteCharger", { charger_id: charger_id });
     if (ok == 3) {
       snack("Charger succesfully deleted - pls manually refresh table");
@@ -42,28 +24,11 @@ const DeleteCharger: React.FC<DeleteChargerProp> = ({
   };
 
   return (
-    <>
-      <DeleteIcon
-        color="error"
-        sx={{ mt: 0.5 }}
-        onClick={handleClickOpen}
-      ></DeleteIcon>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Confirm Delete Charger</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you really really sure that you want to delete the charger{" "}
-            {charger_alias} ({charger_id})?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} autoFocus>
-            No
-          </Button>
-          <Button onClick={remoteStop}>Yes</Button>
-        </DialogActions>
-      </Dialog>
-    </>
+    <ConfirmDeleteAction
+      title="Confirm Delete Charger"
+      description={`Are you really really sure that you want to delete the charger ${charger_alias} (${charger_id})?`}
+      onConfirm={deleteCharger}
+    />
   );
 };
 
