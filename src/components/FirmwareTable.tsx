@@ -11,10 +11,9 @@ import {
   GridToolbarExport,
 } from "@mui/x-data-grid";
 import Snackbar from "@mui/material/Snackbar";
-import Button from "@mui/material/Button";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import ConfirmDeleteAction from "./ConfirmDeleteAction";
 
 interface FirmwareTableProps {
   api: BalanzAPI;
@@ -145,13 +144,11 @@ const FirmwareTable: React.FC<FirmwareTableProps> = ({ api }) => {
           return <div></div>;
         else
           return (
-            <Button
-              onClick={() => {
-                delete_firmware(params.row.firmware_id);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </Button>
+            <ConfirmDeleteAction
+              title="Confirm Delete Firmware"
+              description={`Are you sure that you want to delete the firmware ${params.row.firmware_id}?`}
+              onConfirm={() => delete_firmware(params.row.firmware_id)}
+            />
           );
       },
     },
