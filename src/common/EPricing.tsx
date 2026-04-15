@@ -5,7 +5,6 @@
 
 import { SESSION, CHARGER } from "../types/types";
 import dayjs, { Dayjs } from "dayjs";
-import { setItem, getItem } from "./LocalStorage";
 
 type HOUR_PRICE = {
   DKK_per_kWh: number;
@@ -16,10 +15,67 @@ type HOUR_PRICE = {
 };
 
 const ZONES = ["DK1", "DK2"];
-const MAX_CACHE_DAYS = 90;
+const PRICE_DB_NAME = "balanz-pricing";
+const PRICE_STORE_NAME = "daily_prices";
 
 // Init zones. Each zone is again a map with mapping of start_time (top of hour) => price
 const zone_prices = new Map<string, Map<number, number>>();
+const loaded_price_days = new Set<string>();
+let price_db: Promise<IDBDatabase> | null = null;
+
+function day_cache_key(zone: string, date: Dayjs): string {
+  return zone + ":" + date.format("YYYY-MM-DD");
+}
+
+function open_price_db(): Promise<IDBDatabase> {
+  if (price_db != null) return price_db;
+
+  price_db = new Promise((resolve, reject) => {
+    const request = indexedDB.open(PRICE_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(PRICE_STORE_NAME)) {
+        db.createObjectStore(PRICE_STORE_NAME);
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  return price_db;
+}
+
+async function get_cached_price_data(key: string): Promise<Array<HOUR_PRICE> | null> {
+  const db = await open_price_db();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(PRICE_STORE_NAME, "readonly");
+    const store = transaction.objectStore(PRICE_STORE_NAME);
+    const request = store.get(key);
+
+    request.onsuccess = () => resolve(normalize_price_data(request.result));
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function set_cached_price_data(
+  key: string,
+  value: Array<HOUR_PRICE>,
+): Promise<void> {
+  const db = await open_price_db();
+
+  await new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(PRICE_STORE_NAME, "readwrite");
+    const store = transaction.objectStore(PRICE_STORE_NAME);
+    store.put(value, key);
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
 
 function normalize_price_data(raw: unknown): Array<HOUR_PRICE> | null {
   if (Array.isArray(raw)) return raw as Array<HOUR_PRICE>;
@@ -32,6 +88,19 @@ function normalize_price_data(raw: unknown): Array<HOUR_PRICE> | null {
     }
   }
   return null;
+}
+
+function store_zone_prices(
+  zone: string,
+  date: Dayjs,
+  price_data: Array<HOUR_PRICE>,
+): void {
+  if (zone_prices.get(zone) == null) zone_prices.set(zone, new Map());
+  for (let i = 0; i < price_data.length; i++) {
+    const ts = dayjs(price_data[i].time_start).unix();
+    zone_prices.get(zone)?.set(ts, price_data[i].DKK_per_kWh);
+  }
+  loaded_price_days.add(day_cache_key(zone, date));
 }
 
 function tarif(start_time: Dayjs): number {
@@ -89,8 +158,6 @@ async function download_prices(start_time: number, end_time: number): Promise<vo
 
   const start_date = dayjs.unix(start_time).startOf("day");
   const end_date = dayjs.unix(end_time).startOf("day");
-  const total_days = Math.max(0, end_date.diff(start_date, "day") + 1);
-  const allow_cache = total_days <= MAX_CACHE_DAYS;
 
   const date_loop = async () => {
     for (let zindex = 0; zindex < ZONES.length; zindex++) {
@@ -99,11 +166,12 @@ async function download_prices(start_time: number, end_time: number): Promise<vo
         date <= end_date;
         date = date.add(1, "day")
       ) {
+        const zone = ZONES[zindex];
+        const storage_ix = "price-" + zone + "-" + date.format("YYYY-MM-DD");
+        if (loaded_price_days.has(day_cache_key(zone, date))) continue;
+
         const date_string = dayjs(date).format("YYYY-MM-DD");
-        const storage_ix =
-          "price-" + ZONES[zindex] + "-" + date.format("YYYY-MM-DD");
-        const storage_value = getItem<unknown>(storage_ix);
-        let price_data = normalize_price_data(storage_value);
+        let price_data = await get_cached_price_data(storage_ix);
         if (price_data == null || price_data.length == 0) {
           console.log("No data for " + date_string);
           const url =
@@ -112,7 +180,7 @@ async function download_prices(start_time: number, end_time: number): Promise<vo
             "/" +
             date.format("MM-DD") +
             "_" +
-            ZONES[zindex] +
+            zone +
             ".json";
           const data = await call_api(url);
           if (data == null) {
@@ -122,19 +190,15 @@ async function download_prices(start_time: number, end_time: number): Promise<vo
             continue;
           } else {
             price_data = normalize_price_data(data);
-            if (allow_cache) setItem(storage_ix, data);
+            if (price_data != null && price_data.length > 0)
+              await set_cached_price_data(storage_ix, price_data);
           }
         }
         if (price_data == null || price_data.length == 0) {
           console.log("ERROR - no price data", price_data);
           continue;
         }
-        for (let i = 0; i < price_data.length; i++) {
-          const ts = dayjs(price_data[i].time_start).unix();
-          if (zone_prices.get(ZONES[zindex]) == null)
-            zone_prices.set(ZONES[zindex], new Map());
-          zone_prices.get(ZONES[zindex])?.set(ts, price_data[i].DKK_per_kWh);
-        }
+        store_zone_prices(zone, date, price_data);
       }
     }
   };
